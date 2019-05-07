@@ -6,17 +6,8 @@
 
 {% if article.image and section.settings.banner_enabled %}
   <header class="banner center page_banner dark-overlay-{{section.settings.image_darken}}">
-    <img  src="{{ article.image | img_url: '100x' }}"
-          alt="{% if article.image.alt != blank %}{{ article.image.alt }}{% else %}{{ article.title | escape }}{% endif %}"
-          data-src="{{ article.image | img_url: '1400x', format: 'pjpg' }}"
-          class="lazyload {{ settings.image_loading_style }}"
-          sizes="100vw"
-          srcset="{{ article.image | img_url: '480x', format: 'pjpg' }} 480w,
-                  {{ article.image | img_url: '765x', format: 'pjpg' }} 765w,
-                  {{ article.image | img_url: '1400x', format: 'pjpg' }} 1400w,
-                  {{ article.image | img_url: '2048x', format: 'pjpg' }} 2048w"
-           />
-    <div class="caption">
+    {% include 'image-element', image: article.image, alt: article.image.alt, stretch_width: true %}
+    <div class="caption captionOverlay--true">
       <h1 class="headline">{{ article.title }}</h1>
     </div>
   </header>
@@ -34,14 +25,14 @@
     {% assign sidebar = false %}
   {% endif %}
 
-  <div class="twelve columns {% if sidebar == false %}offset-by-two{% endif %}">
+  <div class="twelve columns {% if sidebar == false %}offset-by-two{% endif %} medium-down--one-whole equal-columns--outside-trim">
     <div class="section clearfix">
       <div class="clearfix breadcrumb">
         {% if section.settings.blog_breadcrumb %}
           <div class="breadcrumb_text left" itemscope itemtype="http://schema.org/BreadcrumbList">
-            <span itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"><a href="{{ shop.url }}" title="{{ shop.name | escape }}" itemprop="item"><span itemprop="name">{{ 'general.breadcrumbs.home' | t }}</span></a></span>
-             <span class="icon-slash">/</span>
-            <span itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"><a href="{{ blog.url }}" title="{{ blog.title | escape }}" itemprop="item"><span itemprop="name">{{ blog.title }}</span></a></span>
+            <span itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"><a href="{{ shop.url }}" title="{{ shop.name | escape }}" itemprop="item"><span itemprop="name">{{ 'general.breadcrumbs.home' | t }}</span></a><meta itemprop="position" content="1" /></span>
+            &nbsp;<span class="icon-slash">/</span>
+            <span itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"><a href="{{ blog.url }}" title="{{ blog.title | escape }}" itemprop="item"><span itemprop="name">{{ blog.title }}</span></a><meta itemprop="position" content="2" /></span>
           </div>
         {% endif %}
         {% if section.settings.blog_pagination %}
@@ -50,7 +41,7 @@
               {{ 'blogs.article.previous_article_html' | t | link_to: blog.next_article }}
             {% endif %}
             {% if blog.previous_article and blog.next_article %}
-               <span class="icon-slash">/</span>
+              &nbsp;<span class="icon-slash">/</span>
             {% endif %}
             {% if blog.previous_article %}
               {{ 'blogs.article.next_article_html' | t | link_to: blog.previous_article }}
@@ -67,12 +58,16 @@
       {% endunless %}
 
         <p class="blog_meta">
-          {% if section.settings.blog_author %}
-            <span>{{ 'blogs.article.by_author' | t: author: article.author }}</span>
+          {% if section.settings.blog_byline %}
+            <span><a href="/search?type=article&q={{ article.author }}">{{ a.author }}{{ 'blogs.article.by_author' | t: author: article.author }}</a></span>
           {% endif %}
 
           {% if section.settings.blog_date %}
             <span>{{ article.published_at | date: format: "month_day_year" }}</span>
+          {% endif %}
+
+          {% if section.settings.read_time %}
+            {% include 'include-read-time' %}
           {% endif %}
 
           {% if section.settings.blog_tags %}
@@ -99,17 +94,7 @@
         <div class="article_content clearfix">
           {% if article.image and section.settings.banner_enabled == false %}
             <p>
-              <img  src="{{ article.image | img_url: '100x' }}"
-                    alt="{% if article.image.alt != blank %}{{ article.image.alt }}{% else %}{{ article.title | escape }}{% endif %}"
-                    data-src="{{ article.image | img_url: '2048x', format: 'pjpg' }}"
-                    class="lazyload {{ settings.image_loading_style }}"
-                    style="max-width: {{ article.image.width }}px"
-                    data-sizes="auto"
-                    data-srcset=" {{ article.image | img_url: '480x', format: 'pjpg' }} 480w,
-                                  {{ article.image | img_url: '765x', format: 'pjpg' }} 765w,
-                                  {{ article.image | img_url: '1400x', format: 'pjpg' }} 1400w,
-                                  {{ article.image | img_url: '2048x', format: 'pjpg' }} 2048w"
-                     />
+              {% include 'image-element', image: article.image, alt: article.image.alt %}
             </p>
           {% endif %}
 
@@ -214,12 +199,12 @@
               <p class="quote align_left">{{ 'general.forms.post_error' | t }}</p>
             {% endif %}
 
-            <div class="six columns alpha">
+            <div class="eight columns alpha">
               <label for="comment_author">{{ 'blogs.comments.name' | t }} <span class="red">*</span></label>
               <input type="text" id="comment_author" name="comment[author]" value="{{ form.author }}" required="required" />
             </div>
 
-            <div class="six columns omega">
+            <div class="eight columns omega">
               <label for="comment_email">{{ 'blogs.comments.email' | t }} <span class="red">*</span></label>
               <input type="text" id="comment_email" name="comment[email]" value="{{ form.email }}" required="required" />
             </div>
@@ -248,19 +233,10 @@
             {% assign skip_article = true %}
           {% endif %}
           {% unless skip_article %}
-            <div class="four columns {% cycle 'alpha', ' ', 'omega' %} article">
+            <div class="one-third columns article">
               {% if a.image %}
                 <a href="{{ a.url }}" title="{{ a.title | escape }}">
-                  <img  src="{{ a.image | img_url: '100x' }}"
-                        alt="{% if a.image.alt != blank %}{{ a.image.alt }}{% else %}{{ a.title | escape }}{% endif %}"
-                        data-src="{{ a.image | img_url: '1200x', format: 'pjpg' }}"
-                        class="lazyload {{ settings.image_loading_style }}"
-                        sizes="auto"
-                        srcset="{{ a.image | img_url: '480x', format: 'pjpg' }} 480w,
-                                {{ a.image | img_url: '600x', format: 'pjpg' }} 600w,
-                                {{ a.image | img_url: '800x', format: 'pjpg' }} 800w,
-                                {{ a.image | img_url: '1200x', format: 'pjpg' }} 1200w"
-                         />
+                  {% include 'image-element', image: a.image, alt: a.image.alt %}
                 </a>
               {% endif %}
 
@@ -270,7 +246,7 @@
                 <a href="{{ a.url }}" title="{{ a.title | escape }}">{{ a.title }}</a>
               </h5>
               <p class="blog_meta">
-                {% if section.settings.blog_author %}
+                {% if section.settings.blog_byline %}
                   <span>{{ 'blogs.article.by_author' | t: author: a.author }}</span>
                 {% endif %}
 
@@ -278,11 +254,15 @@
                   <span>{{ a.published_at | date: format: "month_day_year" }}</span>
                 {% endif %}
 
+                {% if section.settings.read_time %}
+                  {% include 'include-read-time', article: a %}
+                {% endif %}
+
                 {% if settings.disqus_enabled %}
                   <span>
                     <a href="{{ a.url }}#disqus_thread" data-disqus-identifier="{{ a.id }}" class="disqus-comment-count">{{ 'blogs.counts.comments_with_count' | t: count: 0 }}</a>
                   </span>
-                {% elsif a.comments_enabled? and a.comments_count > 0 %}
+                {% elsif section.settings.blog_comment_count and a.comments_count > 0 %}
                   <span>
                     <a href="{{ a.url }}#comments">{{ 'blogs.counts.comments_with_count' | t: count: a.comments_count }}</a>
                   </span>
@@ -300,7 +280,7 @@
                 <div class="excerpt">{{ a.excerpt }}</div>
               {% endif %}
               {% if section.settings.read_more_link %}
-                <a href="{{ a.url }}" title="{{ a.title | escape }}" class="{% if settings.read_more_style == 'button' %}action_button continue-button{% else %}{% endif %}">{{ 'blogs.general.continue_reading_html' | t }}</a>
+                <a href="{{ a.url }}" title="{{ a.title | escape }}" {% if settings.read_more_style == 'button' %}class="action_button continue-button"{% endif %}>{{ 'blogs.general.continue_reading_html' | t }}</a>
               {% endif %}
             </div>
           {% endunless %}
@@ -351,14 +331,25 @@
     },
     {
      "type": "checkbox",
-     "id": "blog_author",
-     "label": "Show author"
+     "id": "blog_byline",
+     "label": "Show author byline"
+    },
+    {
+      "type": "checkbox",
+      "id": "read_time",
+      "label": "Show estimated read time",
+      "default": true
     },
     {
      "type": "checkbox",
      "id": "blog_date",
      "label": "Show date",
      "default": true
+    },
+    {
+     "type": "checkbox",
+     "id": "blog_author",
+     "label": "Show author bio"
     },
     {
       "type": "checkbox",
@@ -373,16 +364,20 @@
      "default": true
     },
     {
-     "type": "checkbox",
-     "id": "read_more_link",
-     "label": "Show continue reading link for related blog post",
-     "default": true
+      "type": "header",
+      "content": "Related blog posts"
     },
     {
      "type": "checkbox",
      "id": "blog_additional_posts",
      "label": "Show related blog posts",
      "default": false
+    },
+    {
+     "type": "checkbox",
+     "id": "read_more_link",
+     "label": "Show continue reading link",
+     "default": true
     },
     {
      "type": "header",
@@ -395,7 +390,8 @@
     {
       "type": "checkbox",
       "id": "toggle",
-      "label": "Toggle sidebar content"
+      "label": "Toggle sidebar content",
+      "default": false
     }
   ],
   "blocks": [
@@ -444,7 +440,7 @@
           "label": "Page"
         }
       ]
-    },    
+    },
     {
       "type": "recent_posts",
       "name": "Recent blog posts",
@@ -471,7 +467,7 @@
           "default": "10"
         }
       ]
-    },    
+    },
     {
       "type": "search",
       "name": "Search form",

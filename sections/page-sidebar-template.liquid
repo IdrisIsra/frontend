@@ -34,7 +34,7 @@
 {% schema %}
 
 {
-  "name": "Sidebar",
+  "name": "Page | sidebar",
   "class": "sidebar-template-section",
   "settings": [
     {
@@ -44,7 +44,8 @@
     {
       "type": "checkbox",
       "id": "toggle",
-      "label": "Toggle sidebar content"
+      "label": "Toggle sidebar content",
+      "default": false
     }
   ],
   "blocks": [
@@ -82,8 +83,8 @@
       "settings": [
         {
           "type": "paragraph",
-          "content": "To test the recently viewed products, view your online store outside of the Editor and visit multiple product pages ([?](https:\/\/help.outofthesandbox.com\/hc\/en-us\/articles\/115008765228))"
-        },      
+          "content": "To test the recently viewed products, view your online store outside of the Editor and visit multiple product pages. [Learn more](https:\/\/help.outofthesandbox.com\/hc\/en-us\/articles\/115008765228)"
+        },
         {
           "type": "text",
           "id": "sidebar_rv_title",
@@ -91,28 +92,13 @@
           "default": "Recently Viewed"
         },
         {
-          "type": "select",
+          "type": "range",
           "id": "sidebar_rv_per",
           "label": "Products limit",
-          "default": "3",
-          "options": [
-            {
-              "value": "1",
-              "label": "1"
-            },
-            {
-              "value": "2",
-              "label": "2"
-            },
-            {
-              "value": "3",
-              "label": "3"
-            },
-            {
-              "value": "4",
-              "label": "4"
-            }
-          ]
+          "min": 1,
+          "max": 4,
+          "step": 1,
+          "default": 3
         }
       ]
     },
@@ -133,7 +119,7 @@
           "default": "<p>Text area can be used for special announcements or general information.</p>"
         }
       ]
-    },    
+    },
     {
       "type": "filter_by_type",
       "name": "Type list",

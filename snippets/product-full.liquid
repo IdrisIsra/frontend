@@ -38,12 +38,12 @@
         {% if product_tags contains 'meta-size-chart-' %}
           {% for tag in product.tags %}
             {% if tag contains 'meta-size-chart-' %}
-              <a href="#size-chart{{product.id}}" class="size_chart" data-remodal-target="size-chart{{product.id}}">{{ 'products.product.size_chart' | t }} <span class="icon-right-arrow"></span></a>
+              <a href="javascript:;" class="size_chart" data-fancybox data-src="#size-chart{{product.id}}" data-type="inline" data-no-instant>{{ 'products.product.size_chart' | t }} <span class="icon-right-arrow"></span></a>
               {% include 'popup-size-chart', product_id: product.id %}
             {% endif %}
           {% endfor %}
         {% elsif settings.size_chart != blank %}
-          <a href="#size-chart" class="size_chart" data-remodal-target="size-chart">{{ 'products.product.size_chart' | t }} <span class="icon-right-arrow"></span></a>
+          <a href="javascript:;" class="size_chart" data-fancybox data-src="#size-chart{{product.id}}" data-type="inline" data-no-instant>{{ 'products.product.size_chart' | t }} <span class="icon-right-arrow"></span></a>
         {% endif %}
 
         {% if collection_handles contains 'coming-soon' %}
@@ -53,10 +53,10 @@
             <meta itemprop="priceCurrency" content="{{ shop.currency }}" />
             <meta itemprop="seller" content="{{ shop.name | escape }}" />
             <link itemprop="availability" href="http://schema.org/{% if product.available %}InStock{% else %}OutOfStock{% endif %}">
-            <meta itemprop="itemCondition" content="New" />
+            <meta itemprop="itemCondition" itemtype="http://schema.org/OfferItemCondition" content="http://schema.org/NewCondition"/>
 
             <span class="sold_out">{% if variant.available == false %}{{ 'products.product.sold_out' | t }}{% endif %}</span>
-            <span itemprop="price" content="{{ variant.price | money_without_currency }}" class="{% if variant.compare_at_price > variant.price %}sale{% endif %}">
+            <span itemprop="price" content="{{ variant.price | money_without_currency | remove: "," }}" class="{% if variant.compare_at_price > variant.price %}sale{% endif %}">
               <span class="current_price {% if product.available == false %}hidden{% endif %}">
                 {% if variant.price > 0 %}
                   <span class="money">{{ variant.price | money }}</span>

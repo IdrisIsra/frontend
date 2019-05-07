@@ -1,4 +1,3 @@
-
 {% comment %}
 ** Collections - default view **
 - Collection template
@@ -6,69 +5,41 @@
 {% endcomment %}
 
 {% if section.settings.featured_collection_image %}
-  {% capture sizes %}100x,480x,765x,1400x,2048x{% endcapture %}
-  {% assign sizes = sizes | split: ',' %}
-
   <header class="banner center page_banner dark-overlay-{{ section.settings.image_darken }}">
-    
-    <img
-          {% if collection.image %}
-            src="{{ collection.image | img_url: sizes.first }}"
-            data-src="{{ collection.image | img_url: sizes.last }}"
-          {%- elsif section.settings.image -%}
-            src="{{ section.settings.image | img_url: sizes.first }}"
-            data-src="{{ section.settings.image | img_url: sizes.last }}"
-          {%- else %}
-            src="{{ collection.products.first.featured_image | product_img_url: sizes.first }}"
-            data-src="{{ collection.products.first.featured_image | product_img_url: sizes.last }}"
-          {% endif %}
-          alt="{{ collection.title | escape }}"
-          class="lazyload {{ settings.image_loading_style }}"
-          sizes="100vw"
-          srcset="{%- for size in sizes -%}
-                    {%- if collection.image -%}
-                      {{ collection.image | img_url: size }}
-                    {%- elsif section.settings.image -%}
-                      {{ section.settings.image | img_url: size, format: 'pjpg' }}
-                    {%- else -%}
-                      {{ collection.products.first.featured_image | product_img_url: size }}
-                    {%- endif -%}
-                    {{ size | replace: "x", "w" }}{% unless forloop.last %},{% endunless %}
-                  {%- endfor -%}
-          " />
+      {% if collection.image %}
+        {% assign image = collection.image %}
+      {%- elsif section.settings.image -%}
+        {% assign image = section.settings.image %}
+      {%- else %}
+        {% assign image = collection.products.first.featured_image %}
+      {% endif %}
+
+      {% include 'image-element', image: image, alt: collection.title, stretch_width: true, progressive: true %}
+
       {% if section.settings.display_collection_title %}
-        <div class="caption">
+        <div class="caption captionOverlay--true">
           <h1 class="headline">{{ collection.title }}</h1>
         </div>
       {% endif %}
   </header>
 {% endif %}
 
-
-
-<a name="pagecontent" id="pagecontent" style="display: none;"></a>
+<a name="pagecontent" id="pagecontent"></a>
 
 <div class="container">
-  
-  {% include 'swipe-menu' %}
-  {% if collection.description != blank %}
-  <div class="section clearfix collection_description">
-    {{ collection.description }}
-  </div>
-  {% endif %}
-  
   {% paginate collection.products by section.settings.pagination_limit %}
     <div class="clearfix breadcrumb-collection">
       {% if section.settings.collection_breadcrumb %}
-        <div class="eight columns breadcrumb_text" itemscope itemtype="http://schema.org/BreadcrumbList">
-          <span itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"><a href="{{ shop.url }}" title="{{ shop.name | escape }}" itemprop="item" class="breadcrumb_link"><span itemprop="name">{{ 'general.breadcrumbs.home' | t }}</span></a></span>
+        <div class="eight columns breadcrumb_text medium-down--one-whole" itemscope itemtype="http://schema.org/BreadcrumbList">
+          <span itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"><a href="{{ shop.url }}" title="{{ shop.name | escape }}" itemprop="item" class="breadcrumb_link"><span itemprop="name">{{ 'general.breadcrumbs.home' | t }}</span></a><meta itemprop="position" content="1" /></span>
           <span class="breadcrumb-divider">/</span>
-          <span itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"><a href="/collections/{% if collection.handle != blank %}{{ collection.handle }}{% else %}all{% endif %}" title="{{ collection.title | escape }}" itemprop="item" class="breadcrumb_link"><span itemprop="name">{{ collection.title }}</span></a></span>
+          <span itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"><a href="/collections/{% if collection.handle != blank %}{{ collection.handle }}{% else %}all{% endif %}" title="{{ collection.title | escape }}" itemprop="item" class="breadcrumb_link"><span itemprop="name">{{ collection.title }}</span></a><meta itemprop="position" content="2" /></span>
           {% if current_tags %}
             {% for tag in current_tags %}
+
               {% unless tag contains 'meta-' %}
                 <span class="breadcrumb-divider">/</span>
-                <span itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"><a href="/collections/{% if collection.handle != blank %}{{ collection.handle }}{% else %}all{% endif %}/{{ tag | handleize }}" title="{{ tag | escape }}" itemprop="item"><span itemprop="name">{{ tag }}</span></a></span>
+                <span itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"><a href="/collections/{% if collection.handle != blank %}{{ collection.handle }}{% else %}all{% endif %}/{{ tag | handleize }}" title="{{ tag | escape }}" itemprop="item"><span itemprop="name">{{ tag }}</span></a><meta itemprop="position" content="{{ forloop.index | plus: 2 }}" /></span>
               {% endunless %}
             {% endfor %}
           {% endif %}
@@ -79,13 +50,13 @@
         </div>
       {% endif %}
     </div>
-    <div class="section clearfix collection-section-sort-by">
+    <div class="section clearfix">
       {% if section.settings.display_collection_title and section.settings.featured_collection_image == false %}
         <div class="eight columns">
           <h1>{{ collection.title }}</h1>
         </div>
       {% endif %}
-      <div class="eight columns section_select {% unless section.settings.display_collection_title and section.settings.featured_collection_image == false %}offset-by-eight{% endunless %}">
+      <div class="eight columns section_select medium-down--one-whole">
         {% if collection.handle != blank and collection.products_count > 0 %}
           {% if section.settings.collection_tags %}
             {% for tag in collection.all_tags %}
@@ -119,7 +90,7 @@
         {% endif %}
       </div>
     </div>
-    <div class="sixteen columns collection-section-sort-by">
+    <div class="sixteen columns">
       <div class="feature_divider"></div>
     </div>
 
@@ -133,10 +104,16 @@
 
     {% if sidebar %}
       {% include 'sidebar' %}
-      <div class="twelve columns">
+      <div class="twelve columns medium-down--one-whole">
     {% else %}
       <div class="sixteen columns">
     {% endif %}
+
+      {% if collection.description != blank %}
+        <div class="section clearfix collection_description">
+          {{ collection.description }}
+        </div>
+      {% endif %}
 
       {% if collection.products.size == 0 %}
         <div class="section clearfix collection-matrix">
@@ -150,13 +127,10 @@
     {% if settings.pagination_type == 'basic_pagination' %}
       {% include 'pagination' with sidebar %}
     {% endif %}
-        
-
 
     </div>
   {% endpaginate %}
-
-  {{ collection.metafields.SEO.seotext }}	
+        {{ collection.metafields.SEO.seotext }}    
 </div>
 
 {% schema %}
@@ -166,62 +140,22 @@
   "class": "collection-template-section",
   "settings": [
     {
-      "type": "select",
+      "type": "range",
       "id": "products_per_row",
       "label": "Products per row",
-      "options": [
-        {
-          "value": "2",
-          "label": "2"
-        },
-        {
-          "value": "3",
-          "label": "3"
-        },
-        {
-          "value": "4",
-          "label": "4"
-        },
-        {
-          "value": "5",
-          "label": "5"
-        }
-      ]
+      "min": 2,
+      "max": 5,
+      "step": 1,
+      "default": 3
     },
     {
-      "type": "select",
+      "type": "range",
       "id": "pagination_limit",
       "label": "Products per page",
-      "options": [
-        {
-          "value": "20",
-          "label": "20"
-        },
-        {
-          "value": "24",
-          "label": "24"
-        },
-        {
-          "value": "30",
-          "label": "30"
-        },
-        {
-          "value": "36",
-          "label": "36"
-        },
-        {
-          "value": "40",
-          "label": "40"
-        },
-        {
-          "value": "48",
-          "label": "48"
-        },
-        {
-          "value": "50",
-          "label": "50"
-        }
-      ]
+      "min": 2,
+      "max": 50,
+      "step": 1,
+      "default": 48
     },
     {
       "type": "checkbox",
@@ -258,7 +192,7 @@
       "type": "image_picker",
       "id": "image",
       "label": "Banner image",
-      "info": "1600 x 1000px recommended"
+      "info": "1800 x 1000px recommended"
     },
     {
       "type": "checkbox",
@@ -277,7 +211,8 @@
     {
       "type": "checkbox",
       "id": "toggle",
-      "label": "Toggle sidebar content"
+      "label": "Toggle sidebar content",
+      "default": false
     }
   ],
   "blocks": [
@@ -315,7 +250,7 @@
       "settings": [
         {
           "type": "paragraph",
-          "content": "To test the recently viewed products, view your online store outside of the Editor and visit multiple product pages ([?](https:\/\/help.outofthesandbox.com\/hc\/en-us\/articles\/115008765228))"
+          "content": "To test the recently viewed products, view your online store outside of the Editor and visit multiple product pages. [Learn more](https:\/\/help.outofthesandbox.com\/hc\/en-us\/articles\/115008765228)"
         },
         {
           "type": "text",
@@ -324,28 +259,13 @@
           "default": "Recently Viewed"
         },
         {
-          "type": "select",
+          "type": "range",
           "id": "sidebar_rv_per",
           "label": "Products limit",
-          "default": "3",
-          "options": [
-            {
-              "value": "1",
-              "label": "1"
-            },
-            {
-              "value": "2",
-              "label": "2"
-            },
-            {
-              "value": "3",
-              "label": "3"
-            },
-            {
-              "value": "4",
-              "label": "4"
-            }
-          ]
+          "min": 1,
+          "max": 4,
+          "step": 1,
+          "default": 3
         }
       ]
     },
@@ -363,7 +283,7 @@
           "type": "textarea",
           "id": "filter_tags",
           "label": "Filter tags",
-          "info": "Add a comma-separated list of product tags. Only the tags found in the collection will be displayed as filters ([?](https://help.outofthesandbox.com/hc/en-us/articles/115008642047))"
+          "info": "Add a comma-separated list of product tags. Only the tags found in the collection will be displayed as filters. [Learn more](https://help.outofthesandbox.com/hc/en-us/articles/115008642047)"
         },
         {
           "type": "checkbox",

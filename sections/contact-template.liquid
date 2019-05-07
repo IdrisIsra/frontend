@@ -5,17 +5,8 @@
 
 {% if section.settings.image != nil %}
   <header class="banner center page_banner dark-overlay-{{ section.settings.image_darken }}">
-    <img  src="{{ section.settings.image | img_url: '100x' }}"
-          alt="{% if section.settings.image.alt != blank %}{{ section.settings.image.alt | escape }}{% else %}{{ page.title | escape }}{% endif %}"
-          class="lazyload {{ settings.image_loading_style }}"
-          data-src="{{ section.settings.image | img_url: '1400x', format: 'pjpg' }}"
-          sizes="100vw"
-          srcset="{{ section.settings.image | img_url: '480x', format: 'pjpg' }} 480w,
-                  {{ section.settings.image | img_url: '765x', format: 'pjpg' }} 765w,
-                  {{ section.settings.image | img_url: '1400x', format: 'pjpg' }} 1400w,
-                  {{ section.settings.image | img_url: '2048x', format: 'pjpg' }} 2048w"
-           />
-    <div class="caption">
+    {% include 'image-element', image: section.settings.image, alt: section.settings.image.alt, stretch_width: true, progressive: true %}
+    <div class="caption captionOverlay--true">
       <h1 class="headline">{{ section.settings.title }}</h1>
       <p class="subtitle">{{ section.settings.subtitle }}</p>
     </div>
@@ -26,7 +17,7 @@
 
 <div class="container main content">
 
-  <div class="ten columns offset-by-three page clearfix">
+  <div class="ten columns offset-by-three page clearfix equal-columns--outside-trim">
     {% if section.settings.image == nil %}
       <h1>{{ page.title }}</h1>
       <div class="feature_divider"></div>
@@ -60,12 +51,12 @@
       {% endif %}
 
        <br class="clear" />
-       <div class="five columns alpha">
+       <div class="eight columns alpha">
         {% assign name_attr = 'contact.form.name' | handle %}
         <label for="contactFormName">{{ 'contact.form.name' | t }} <span class="red">*</span></label>
         <input type="text" id="contactFormName" name="contact[{{ name_attr }}]" placeholder="{{ 'contact.form.name' | t }}" autocapitalize="words" value="{% if form[name_attr] %}{{ form[name_attr] }}{% elsif customer %}{{ customer.name }}{% endif %}" required="required">
        </div>
-       <div class="five columns omega">
+       <div class="eight columns omega">
         <label for="contactFormEmail">{{ 'contact.form.email' | t }} <span class="red">*</span></label>
         <input type="email" id="contactFormEmail" name="contact[email]" placeholder="{{ 'contact.form.email' | t }}" autocorrect="off" autocapitalize="off" value="{% if form.email %}{{ form.email }}{% elsif customer %}{{ customer.email }}{% endif %}" required="required">
        </div>
@@ -78,15 +69,17 @@
       <label for="contactFormMessage">{{ 'contact.form.message' | t }} <span class="red">*</span></label>
       <textarea rows="5" id="contactFormMessage" name="contact[body]" placeholder="{{ 'contact.form.message' | t }}" required="required">{% if form.body %}{{ form.body }}{% endif %}</textarea>
 
+      {% if section.settings.text %}
+        {{ section.settings.text }}
+      {% endif %}
+
       <input type="submit" class="submit action_button" value="{{ 'contact.form.send' | t }}" />
     {% endform %}
   </div>
 </div>
 
-{% if section.settings.contact_address != blank %}
-  <div class="embed-container maps">
-    <iframe width="100%" height="220" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://maps.google.com/maps?f=q&amp;source=embed&amp;hl=en&amp;geocode=&amp;q={{ section.settings.contact_address | replace: ' ', '+' }}&amp;z={{ section.settings.zoom_level }}&amp;output=embed"></iframe>
-  </div>
+{% if section.settings.show_map %}
+  {% include 'include-map' %}
 {% endif %}
 
 {% schema %}
@@ -103,7 +96,7 @@
       "type": "image_picker",
       "id": "image",
       "label": "Image",
-      "info": "1600 x 600px recommended"
+      "info": "1800 x 800px recommended"
     },
     {
       "type": "checkbox",
@@ -124,42 +117,103 @@
       "default": "Subheading"
     },
     {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text"
+    },
+    {
         "type": "header",
         "content": "Map"
     },
     {
+      "type": "checkbox",
+      "id": "show_map",
+      "label": "Show map",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "wide_display",
+      "label": "Wide display",
+      "default": true
+    },
+    {
       "type": "text",
-      "id": "contact_address",
-      "label": "Street address",
-      "info": "The full address that will be placed on the map."
+      "id": "map_address",
+      "label": "Address",
+      "info": "Google Maps will find the exact location"
+    },
+    {
+      "type": "range",
+      "id": "map_height",
+      "min": 300,
+      "max": 600,
+      "step": 10,
+      "unit": "px",
+      "label": "Map height",
+      "default": 400
+    },
+    {
+      "type": "range",
+      "id": "zoom_level",
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "unit": "x",
+      "label": "Map zoom level",
+      "default": 16
+    },
+    {
+      "type": "image_picker",
+      "id": "map_image",
+      "label": "Image",
+      "info": "Displayed when map isn't loaded"
+    },
+    {
+      "type": "header",
+      "content": "API key"
+    },
+    {
+      "type": "text",
+      "id": "api_key",
+      "label": "Google Maps API key",
+      "info": "You’ll need to [register a Google Maps API Key](https://help.shopify.com/manual/using-themes/troubleshooting/map-section-api-key) to display the map"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_pin",
+      "label": "Show pin",
+      "info": "Requires use of API key",
+      "default": true
     },
     {
       "type": "select",
-      "id": "zoom_level",
-      "label": "Map zoom level (1-20)",
+      "id": "map_style",
+      "label": "Map color scheme",
       "options": [
-        {"value": "1", "label": "1"},
-        {"value": "2", "label": "2"},
-        {"value": "3", "label": "3"},
-        {"value": "4", "label": "4"},
-        {"value": "5", "label": "5"},
-        {"value": "6", "label": "6"},
-        {"value": "7", "label": "7"},
-        {"value": "8", "label": "8"},
-        {"value": "9", "label": "9"},
-        {"value": "10", "label": "10"},
-        {"value": "11", "label": "11"},
-        {"value": "12", "label": "12"},
-        {"value": "13", "label": "13"},
-        {"value": "14", "label": "14"},
-        {"value": "15", "label": "15"},
-        {"value": "16", "label": "16"},
-        {"value": "17", "label": "17"},
-        {"value": "18", "label": "18"},
-        {"value": "19", "label": "19"},
-        {"value": "20", "label": "20"}
+        {
+          "value": "default",
+          "label": "Default"
+        },
+        {
+          "value": "aubergine",
+          "label": "Aubergine"
+        },
+        {
+          "value": "night",
+          "label": "Night"
+        },
+        {
+          "value": "retro",
+          "label": "Retro"
+        },
+        {
+          "value": "silver",
+          "label": "Silver"
+        }
       ],
-      "default": "12"
+      "default": "default",
+      "info": "Requires use of API key"
     }
   ]
 }

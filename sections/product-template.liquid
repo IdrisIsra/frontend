@@ -1,4 +1,3 @@
-
 {% comment %}
 ** Product - default view **
 - Product template
@@ -6,8 +5,8 @@
 
 <a name="pagecontent" id="pagecontent"></a>
 
-<div class="index-section--flush powr-popup" id="5310a79d_1541726305"></div>
-<div class="container main content">
+<div class="container main content product-name--{{ product.handle }}">
+
   <div class="sixteen columns">
     {% if collection.previous_product or collection.next_product or section.settings.product_breadcrumb %}
       <div class="clearfix breadcrumb-collection">
@@ -26,17 +25,33 @@
 
         {% if section.settings.product_breadcrumb %}
           <div class="breadcrumb_text" itemscope itemtype="http://schema.org/BreadcrumbList">
-            <span itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"><a href="{{ shop.url }}" title="{{ shop.name | escape }}" itemprop="item" class="breadcrumb_link"><span itemprop="name">{{ 'general.breadcrumbs.home' | t }}</span></a></span>
+            <span itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+              <a href="{{ shop.url }}" title="{{ shop.name | escape }}" itemprop="item" class="breadcrumb_link">
+                <span itemprop="name">{{ 'general.breadcrumbs.home' | t }}</span>
+              </a>
+              <meta itemprop="position" content="1" />
+            </span>
             <span class="breadcrumb-divider">/</span>
             <span itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
               {% if collection %}
-                <a href="{{ collection.url }}" title="{{ collection.title | escape }}" itemprop="item" class="breadcrumb_link"><span itemprop="name">{{ collection.title }}</span></a>
+                <a href="{{ collection.url }}" title="{{ collection.title | escape }}" itemprop="item" class="breadcrumb_link">
+                  <span itemprop="name">{{ collection.title }}</span>
+                  <meta itemprop="position" content="2" />
+                  </a>
               {% else %}
-                <a href="/collections/all" title="{{ collections.all.title }}" class="breadcrumb_link"><span>{{ collections.all.title }}</span></a>
+                <a href="/collections/all" title="{{ collections.all.title }}" itemprop="item" class="breadcrumb_link">
+                  <span itemprop="name">{{ collections.all.title }}</span>
+                  <meta itemprop="position" content="2" />
+                  </a>
               {% endif %}
             </span>
             <span class="breadcrumb-divider">/</span>
-            {{ product.title }}
+            <span itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+              <a href="{{ product.url }}" itemprop="item" class="breadcrumb_link">
+                <span itemprop="name">{{ product.title }}</span>
+                <meta itemprop="position" content="3" />
+              </a>
+            </span>
           </div>
         {% endif %}
       </div>
@@ -53,21 +68,21 @@
   <div class="product clearfix">
     {% if sidebar %}
       {% include 'sidebar' %}
-      <div class="twelve columns">
+      <div class="twelve columns medium-down--one-whole sidebar--{{ sidebar }}">
     {% else %}
       <div class="sixteen columns">
     {% endif %}
 
-    <div  class="product-{{ product.id }}" itemscope itemtype="http://schema.org/Product"
+    <div  class="product-{{ product.id }}"
           data-free-text="{{ settings.free_price_text }}"
           >
-      <div class="section product_section clearfix js-product_section {% if section.settings.product_images_position == 'right' %}align_right--images{% endif %}">
+      <div class="section product_section clearfix js-product_section {% if section.settings.product_images_position == 'right' %}align_right--images{% endif %}" itemscope itemtype="http://schema.org/Product" data-rv-handle="{{ product.handle }}">
 
-        <div class="{% if sidebar %}seven{% else %}nine{% endif %} columns {% if section.settings.product_images_position == 'left' %}alpha{% else %}omega{% endif %}">
+        <div class="nine columns medium-down--one-whole {% if section.settings.product_images_position == 'left' %}alpha{% else %}omega{% endif %}">
           {% include 'product-images' %}
         </div>
 
-        <div class="{% if sidebar %}five{% else %}seven{% endif %} columns {% if section.settings.product_images_position == 'left' %}omega{% else %}alpha{% endif %}">
+        <div class="seven columns medium-down--one-whole  {% if section.settings.product_images_position == 'left' %}omega{% else %}alpha{% endif %}">
 
           {% assign collection_handles = product.collections | map: 'handle' %}
           {% assign variant = product.selected_or_first_available_variant %}
@@ -77,10 +92,8 @@
               <div class="sale_banner_product">{{ 'collections.general.sale' | t }}</div>
             {% endif %}
           {% endif %}
-          
-          
           {% if product.tags contains 'yeni' %}
-            <div class="new_banner" style="position: static; margin: 10px 0;"></div>
+          <div class="new_banner" style="position: static; margin: 10px 0;"></div>
           {% endif %}
           {% if collection_handles contains 'pre-order' %}
             <div class="preorder_banner_product">{{ 'collections.general.pre_order' | t }}</div>
@@ -98,29 +111,23 @@
             </p>
           {% endif %}
           <h1 class="product_name" itemprop="name">{{ product.title }}</h1>
-          
-          <div class='jdgm-widget jdgm-preview-badge' data-id='{{ product.id }}'>{{ product.metafields.judgeme.badge }}</div>
-          
-          
-          {% if settings.enable_shopify_product_badges and settings.enable_shopify_review_comments %}
-          
-          {% comment %}
+          {% if section.settings.enable_shopify_product_badges and settings.enable_shopify_review_comments %}
             <span class="shopify-product-reviews-badge" data-id="{{ product.id }}"></span>
-          {% endcomment %}
-          
           {% endif %}
           <div class="feature_divider"></div>
+
+
 
           {% assign product_tags = product.tags | join: ' ' %}
           {% if product_tags contains 'meta-size-chart-' %}
             {% for tag in product.tags %}
               {% if tag contains 'meta-size-chart-' %}
-                <a href="#size-chart{{product.id}}" class="size_chart" data-remodal-target="size-chart{{product.id}}" data-no-instant>{{ 'products.product.size_chart' | t }} <span class="icon-right-arrow"></span></a>
+                <a href="javascript:;" class="size_chart" data-fancybox data-src="#size-chart{{product.id}}" data-type="inline" data-no-instant>{{ 'products.product.size_chart' | t }} <span class="icon-right-arrow"></span></a>
                 {% include 'popup-size-chart', product_id: product.id %}
               {% endif %}
             {% endfor %}
           {% elsif settings.size_chart != blank %}
-            <a href="#size-chart" class="size_chart" data-remodal-target="size-chart" data-no-instant>{{ 'products.product.size_chart' | t }} <span class="icon-right-arrow"></span></a>
+            <a href="javascript:;" class="size_chart" data-fancybox data-src="#size-chart{{product.id}}" data-type="inline" data-no-instant>{{ 'products.product.size_chart' | t }} <span class="icon-right-arrow"></span></a>
           {% endif %}
 
 
@@ -131,10 +138,10 @@
               <meta itemprop="priceCurrency" content="{{ shop.currency }}" />
               <meta itemprop="seller" content="{{ shop.name | escape }}" />
               <link itemprop="availability" href="http://schema.org/{% if variant.available %}InStock{% else %}OutOfStock{% endif %}">
-              <meta itemprop="itemCondition" content="New" />
+              <meta itemprop="itemCondition" itemtype="http://schema.org/OfferItemCondition" content="http://schema.org/NewCondition"/>
 
               <span class="sold_out">{% if variant.available == false %}{{ 'products.product.sold_out' | t }}{% endif %}</span>
-              <span itemprop="price" content="{{ variant.price | money_without_currency }}" class="{% if variant.compare_at_price > variant.price %}sale{% endif %}">
+              <span itemprop="price" content="{{ variant.price | money_without_currency | remove: "," }}" class="{% if variant.compare_at_price > variant.price %}sale{% endif %}">
                 <span class="current_price {% if product.available == false %}hidden{% endif %}">
                   {% if variant.price > 0 %}
                     <span class="money">{{ variant.price | money }}</span>
@@ -181,8 +188,10 @@
             {% endif %}
           {% endif %}
 
-          {% if settings.enable_shopify_review_comments and settings.review_position == "next_to_gallery" %}
-            <div id="shopify-product-reviews" data-id="{{product.id}}">{{ product.metafields.spr.reviews }}</div>
+          {% if section.settings.review_position == "next_to_gallery" %}
+            <div class="shopify-reviews reviewsVisibility--{{settings.enable_shopify_review_comments}}">
+              <div id="shopify-product-reviews" data-id="{{product.id}}">{{ product.metafields.spr.reviews }}</div>
+            </div>
           {% endif %}
 
           {% if section.settings.display_collections or section.settings.display_tags or section.settings.display_type %}
@@ -240,25 +249,20 @@
         </div>
       {% endif %}
 
-
-      {% if settings.enable_shopify_review_comments and settings.review_position == "below_gallery" %}
-    
-        {% comment %}
-        <div class="shopify-reviews">
+      {% if section.settings.review_position == "below_gallery" %}
+        <div class="shopify-reviews reviewsVisibility--{{settings.enable_shopify_review_comments}}">
           <div id="shopify-product-reviews" data-id="{{product.id}}">{{ product.metafields.spr.reviews }}</div>
         </div>
-        {% endcomment %}
-    
       {% endif %}
     </div>
 
     {% if sidebar %}
 
             {% if section.settings.display_related_products %}
-              {% include 'related-products' %}
+              {% include 'include-related-products' %}
             {% endif %}
             {% if section.settings.display_recently_viewed %}
-              {% include 'recently-viewed' %}
+              {% include 'include-recently-viewed' %}
             {% endif %}
 
           </div>
@@ -272,21 +276,14 @@
       </div>
 
       {% if section.settings.display_related_products %}
-        {% include 'related-products' %}
+        {% include 'include-related-products' %}
       {% endif %}
       {% if section.settings.display_recently_viewed %}
-        {% include 'recently-viewed' %}
+        {% include 'include-recently-viewed' %}
       {% endif %}
 
     {% endif %}
-	<section id="home-four-banner" style="margin-top: -30px;">
-      <div class="container">
-        <div class="home-banner"><a href="/apps/help-center"><img src="{{ "same_day_cargo_banner.png" | asset_url }}"/></a></div>
-        <div class="home-banner"><a href="/apps/help-center"><img src="{{ "easy_return_banner.png" | asset_url }}"/></a></div>
-        <div class="home-banner"><a href="/apps/help-center"><img src="{{ "credit_card_installment_banner.png" | asset_url }}"/></a></div>
-        <div class="home-banner"><a href="/apps/help-center"><img src="{{ "pay_at_the_door_banner.png" | asset_url }}"/></a></div>
-      </div>
-    </section>
+
 {% schema %}
 
 {
@@ -360,15 +357,19 @@
       "type": "select",
       "id": "thumbnail_position",
       "label": "Thumbnail position",
-      "default": "bottom-thumbnails",
+      "default": "bottom-slider",
       "options": [
+        {
+          "value": "bottom-thumbnails",
+          "label": "Bottom (grid)"
+        },
+        {
+          "value": "bottom-slider",
+          "label": "Bottom (slider)"
+        },
         {
           "value": "left-thumbnails",
           "label": "Left"
-        },
-        {
-          "value": "bottom-thumbnails",
-          "label": "Bottom"
         },
         {
           "value": "right-thumbnails",
@@ -400,6 +401,13 @@
       "id": "display_savings",
       "label": "Show price savings",
       "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_payment_button",
+      "label": "Show dynamic checkout button",
+      "default": true,
+      "info": "Each customer will see their preferred payment method from those available on your store, such as PayPal or Apple Pay. [Learn more](https:\/\/help.shopify.com\/manual\/using-themes\/change-the-layout\/dynamic-checkout)"
     },
     {
       "type": "checkbox",
@@ -439,12 +447,43 @@
     },
     {
       "type": "header",
+      "content": "Product reviews"
+    },
+    {
+      "type": "paragraph",
+      "content": "Reviews app must be enabled. [Learn more](https://help.outofthesandbox.com/hc/en-us/articles/360008549274#section2)"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_shopify_product_badges",
+      "label": "Display star rating on product",
+      "default": false
+    },
+    {
+      "type": "radio",
+      "id": "review_position",
+      "label": "Reviews position",
+      "default": "next_to_gallery",
+      "options": [
+        {
+          "value": "next_to_gallery",
+          "label": "In product description area"
+        },
+        {
+          "value": "below_gallery",
+          "label": "Below image\/description"
+        }
+      ]
+    },
+    {
+      "type": "header",
       "content": "Related products"
     },
     {
       "type": "checkbox",
       "id": "display_related_products",
-      "label": "Show related products ([?](https:\/\/help.outofthesandbox.com\/hc\/en-us\/articles\/115006909487-Related-Products))",
+      "label": "Show related products",
+      "info": "[Learn more](https:\/\/help.outofthesandbox.com\/hc\/en-us\/articles\/115006909487-Related-Products)",
       "default": true
     },
     {
@@ -464,76 +503,22 @@
       ]
     },
     {
-      "type": "select",
+      "type": "range",
       "id": "related_products_limit",
-      "label": "Product limit",
-      "default": "12",
-    "options": [
-        {
-          "value": "3",
-          "label": "3"
-        },
-        {
-          "value": "4",
-          "label": "4"
-        },
-        {
-          "value": "5",
-          "label": "5"
-        },
-        {
-          "value": "6",
-          "label": "6"
-        },
-        {
-          "value": "8",
-          "label": "8"
-        },
-        {
-          "value": "10",
-          "label": "10"
-        },
-        {
-          "value": "12",
-          "label": "12"
-        },
-        {
-          "value": "15",
-          "label": "15"
-        },
-        {
-          "value": "20",
-          "label": "20"
-        },
-        {
-          "value": "24",
-          "label": "24"
-        },
-        {
-          "value": "48",
-          "label": "48"
-        }
-      ]
+      "label": "Limit products",
+      "min": 3,
+      "max": 50,
+      "step": 1,
+      "default": 12
     },
     {
-      "type": "select",
+      "type": "range",
       "id": "products_per",
       "label": "Products per row",
-      "default": "3",
-      "options": [
-        {
-          "value": "3",
-          "label": "3"
-        },
-        {
-          "value": "4",
-          "label": "4"
-        },
-        {
-          "value": "5",
-          "label": "5"
-        }
-      ]
+      "min": 3,
+      "max": 5,
+      "step": 1,
+      "default": 3
     },
     {
       "type": "header",
@@ -541,7 +526,7 @@
     },
     {
       "type": "paragraph",
-      "content": "To test the recently viewed products, view your online store outside of the Editor and visit multiple product pages ([?](https:\/\/help.outofthesandbox.com\/hc\/en-us\/articles\/115008765228))"
+      "content": "To test the recently viewed products, view your online store outside of the Editor and visit multiple product pages. [Learn more](https:\/\/help.outofthesandbox.com\/hc\/en-us\/articles\/115008765228)"
     },
     {
       "type": "checkbox",
@@ -572,72 +557,22 @@
       ]
     },
     {
-      "type": "select",
+      "type": "range",
       "id": "rv_max_display",
       "label": "Products limit",
-      "default": "4",
-      "options": [
-        {
-          "value": "3",
-          "label": "3"
-        },
-        {
-          "value": "4",
-          "label": "4"
-        },
-        {
-          "value": "5",
-          "label": "5"
-        },
-        {
-          "value": "6",
-          "label": "6"
-        },
-        {
-          "value": "7",
-          "label": "7"
-        },
-        {
-          "value": "8",
-          "label": "8"
-        },
-        {
-          "value": "9",
-          "label": "9"
-        },
-        {
-          "value": "10",
-          "label": "10"
-        },
-        {
-          "value": "11",
-          "label": "11"
-        },
-        {
-          "value": "12",
-          "label": "12"
-        }
-      ]
+      "min": 3,
+      "max": 12,
+      "step": 1,
+      "default": 4
     },
     {
-      "type": "select",
+      "type": "range",
       "id": "rv_per",
       "label": "Products per row",
-      "default": "4",
-      "options": [
-        {
-          "value": "3",
-          "label": "3"
-        },
-        {
-          "value": "4",
-          "label": "4"
-        },
-        {
-          "value": "5",
-          "label": "5"
-        }
-      ]
+      "min": 3,
+      "max": 5,
+      "step": 1,
+      "default": 4
     },
     {
       "type": "header",
@@ -650,7 +585,8 @@
     {
       "type": "checkbox",
       "id": "toggle",
-      "label": "Toggle sidebar content"
+      "label": "Toggle sidebar content",
+      "default": false
     }
   ],
   "blocks": [
@@ -688,7 +624,7 @@
       "settings": [
         {
           "type": "paragraph",
-          "content": "To test the recently viewed products, view your online store outside of the Editor and visit multiple product pages ([?](https:\/\/help.outofthesandbox.com\/hc\/en-us\/articles\/115008765228))"
+          "content": "To test the recently viewed products, view your online store outside of the Editor and visit multiple product pages. [Learn more](https:\/\/help.outofthesandbox.com\/hc\/en-us\/articles\/115008765228)"
         },
         {
           "type": "text",
@@ -697,28 +633,13 @@
           "default": "Recently Viewed"
         },
         {
-          "type": "select",
+          "type": "range",
           "id": "sidebar_rv_per",
           "label": "Products limit",
-          "default": "3",
-          "options": [
-            {
-              "value": "1",
-              "label": "1"
-            },
-            {
-              "value": "2",
-              "label": "2"
-            },
-            {
-              "value": "3",
-              "label": "3"
-            },
-            {
-              "value": "4",
-              "label": "4"
-            }
-          ]
+          "min": 1,
+          "max": 4,
+          "step": 1,
+          "default": 3
         }
       ]
     },

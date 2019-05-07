@@ -7,10 +7,10 @@
 <div class="container social-feeds-wrap">
   <div class="section clearfix homepage_content">
     {% for block in section.blocks %}
+      {% assign blockLength = forloop.length %}
       {% if block.type == 'instagram' %}
-
-        <div class="{% if forloop.length > 1 %}eight{% else %}sixteen{% endif %} columns" {{ block.shopify_attributes }}>
-          <h2 class="title insta {% if forloop.length == 1 %}center{% endif %}">
+        <div class="block__{{ block.type }} {% if blockLength > 1 %}eight{% else %}sixteen{% endif %} columns equal-columns--outside-trim" {{ block.shopify_attributes }}>
+          <h2 class="title insta {% if blockLength == 1 %}center{% endif %}">
             {% if settings.instagram_link != blank %}
               <a href="{{ settings.instagram_link }}" target="_blank">
             {% endif %}
@@ -24,12 +24,12 @@
           {% endif %}
 
           {% if block.settings.instagram_client_id != blank %}
-            <div id="instafeed" class="js-instafeed" data-client-id="{{ block.settings.instagram_client_id | strip }}" data-count="{{ block.settings.instagram_count }}"></div>
+            <div id="instafeed" class="js-instafeed" data-client-id="{{ block.settings.instagram_client_id | strip }}" data-count="{{ block.settings.instagram_count }}" data-column="{% if blockLength > 1 %}eight{% else %}four{% endif %}"></div>
           {% else %}
             <div id="instafeed" class="clearfix placeholder-instagram">
               {% for i in (1..block.settings.instagram_count) %}
-                <div class="four columns">
-                  <a href="#">
+                <div class="{% if blockLength > 1 %}eight{% else %}four{% endif %} columns instagram__item small-down--one-whole">
+                  <a href="#" class="instagram__link">
                     {{ 'image' | placeholder_svg_tag: 'placeholder-svg placeholder-svg--instagram' }}
                   </a>
                 </div>
@@ -94,36 +94,13 @@
           ]
         },
         {
-          "type": "select",
+          "type": "range",
           "id": "tweet_count",
           "label": "Number of tweets",
-          "options": [
-              {
-                "value": "1",
-                "label": "1"
-              },
-              {
-                "value": "2",
-                "label": "2"
-              },
-              {
-                "value": "3",
-                "label": "3"
-              },
-              {
-                "value": "4",
-                "label": "4"
-              },
-              {
-                "value": "5",
-                "label": "5"
-              },
-              {
-                "value": "6",
-                "label": "6"
-              }
-            ],
-          "default": "2"
+          "min": 1,
+          "max": 10,
+          "step": 1,
+          "default": 2
         }
       ]
     },
@@ -135,7 +112,8 @@
         {
           "type": "text",
           "id": "instagram_client_id",
-          "label": "Instagram Access Token ([?](http:\/\/outofthesandbox.com\/pages\/instagram-access-token))"
+          "label": "Instagram Access Token",
+          "info": "[Learn more](https:\/\/outofthesandbox.com\/pages\/instagram-access-token)"
         },
         {
           "type": "text",
@@ -144,36 +122,13 @@
           "default": "Instagram"
         },
         {
-          "type": "select",
+          "type": "range",
           "id": "instagram_count",
           "label": "Number of images",
-          "options": [
-              {
-                "value": "2",
-                "label": "2"
-              },
-              {
-                "value": "4",
-                "label": "4"
-              },
-              {
-                "value": "6",
-                "label": "6"
-              },
-              {
-                "value": "8",
-                "label": "8"
-              },
-              {
-                "value": "10",
-                "label": "10"
-              },
-              {
-                "value": "12",
-                "label": "12"
-              }
-          ],
-          "default": "6"
+          "min": 2,
+          "max": 12,
+          "step": 2,
+          "default": 6
         }
       ]
     }

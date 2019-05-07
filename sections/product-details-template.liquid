@@ -1,4 +1,3 @@
-
 {% comment %}
 ** Product with additional details - custom view **
 - Product template
@@ -9,7 +8,7 @@
 
 <a name="pagecontent" id="pagecontent"></a>
 
-<div class="container main content">
+<div class="container main content product-name--{{ product.handle }}">
   <div class="sixteen columns">
     {% if collection.previous_product or collection.next_product or section.settings.product_breadcrumb %}
       <div class="clearfix breadcrumb-collection">
@@ -28,17 +27,33 @@
 
         {% if section.settings.product_breadcrumb %}
           <div class="breadcrumb_text" itemscope itemtype="http://schema.org/BreadcrumbList">
-            <span itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"><a href="{{ shop.url }}" title="{{ shop.name | escape }}" itemprop="item" class="breadcrumb_link"><span itemprop="name">{{ 'general.breadcrumbs.home' | t }}</span></a></span>
+            <span itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+              <a href="{{ shop.url }}" title="{{ shop.name | escape }}" itemprop="item" class="breadcrumb_link">
+                <span itemprop="name">{{ 'general.breadcrumbs.home' | t }}</span>
+              </a>
+              <meta itemprop="position" content="1" />
+            </span>
             <span class="breadcrumb-divider">/</span>
             <span itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
               {% if collection %}
-                <a href="{{ collection.url }}" title="{{ collection.title | escape }}" itemprop="item" class="breadcrumb_link"><span itemprop="name">{{ collection.title }}</span></a>
+                <a href="{{ collection.url }}" title="{{ collection.title | escape }}" itemprop="item" class="breadcrumb_link">
+                  <span itemprop="name">{{ collection.title }}</span>
+                  <meta itemprop="position" content="2" />
+                  </a>
               {% else %}
-                <a href="/collections/all" title="{{ collections.all.title }}" class="breadcrumb_link"><span>{{ collections.all.title }}</span></a>
+                <a href="/collections/all" title="{{ collections.all.title }}" itemprop="item" class="breadcrumb_link">
+                  <span itemprop="name">{{ collections.all.title }}</span>
+                  <meta itemprop="position" content="2" />
+                  </a>
               {% endif %}
             </span>
             <span class="breadcrumb-divider">/</span>
-            {{ product.title }}
+            <span itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+              <a href="{{ product.url }}" itemprop="item" class="breadcrumb_link">
+                <span itemprop="name">{{ product.title }}</span>
+                <meta itemprop="position" content="3" />
+              </a>
+            </span>
           </div>
         {% endif %}
       </div>
@@ -51,15 +66,15 @@
   <div class="product clearfix">
     <div class="sixteen columns">
 
-      <div class="product-{{ product.id }}" itemscope itemtype="http://schema.org/Product"
+      <div class="product-{{ product.id }}"
             data-free-text="{{ settings.free_price_text }}">
-        <div class="section product_section clearfix js-product_section {% if section.settings.product_images_position == 'right' %}align_right--images{% endif %}">
+        <div class="section product_section clearfix js-product_section {% if section.settings.product_images_position == 'right' %}align_right--images{% endif %}" itemscope itemtype="http://schema.org/Product" data-rv-handle="{{ product.handle }}">
 
-          <div class="nine columns {% if section.settings.product_images_position == 'left' %}alpha{% else %}omega{% endif %}">
+          <div class="nine columns medium-down--one-whole {% if section.settings.product_images_position == 'left' %}alpha{% else %}omega{% endif %}">
             {% include 'product-images' %}
           </div>
 
-          <div class="seven columns {% if section.settings.product_images_position == 'left' %}omega{% else %}alpha{% endif %}">
+          <div class="seven columns medium-down--one-whole {% if section.settings.product_images_position == 'left' %}omega{% else %}alpha{% endif %}">
 
             {% assign collection_handles = product.collections | map: 'handle' %}
             {% assign variant = product.selected_or_first_available_variant %}
@@ -88,11 +103,8 @@
               </p>
             {% endif %}
             <h1 class="product_name" itemprop="name">{{ product.title }}</h1>
-            
-            <div class='jdgm-widget jdgm-preview-badge' data-id='{{ product.id }}'>{{ product.metafields.judgeme.badge }}</div>
-            
-            {% if settings.enable_shopify_product_badges and settings.enable_shopify_review_comments %}
-<!--               <span class="shopify-product-reviews-badge" data-id="{{ product.id }}"></span> -->
+            {% if section.settings.enable_shopify_product_badges and settings.enable_shopify_review_comments %}
+              <span class="shopify-product-reviews-badge" data-id="{{ product.id }}"></span>
             {% endif %}
             <div class="feature_divider"></div>
 
@@ -100,24 +112,25 @@
             {% if product_tags contains 'meta-size-chart-' %}
               {% for tag in product.tags %}
                 {% if tag contains 'meta-size-chart-' %}
-                  <a href="#size-chart{{product.id}}" class="size_chart" data-remodal-target="size-chart{{product.id}}" data-no-instant>{{ 'products.product.size_chart' | t }} <span class="icon-right-arrow"></span></a>
+                  <a href="javascript:;" class="size_chart" data-fancybox data-src="#size-chart{{product.id}}" data-type="inline" data-no-instant>{{ 'products.product.size_chart' | t }} <span class="icon-right-arrow"></span></a>
                   {% include 'popup-size-chart', product_id: product.id %}
                 {% endif %}
               {% endfor %}
             {% elsif settings.size_chart != blank %}
-              <a href="#size-chart" class="size_chart" data-remodal-target="size-chart" data-no-instant>{{ 'products.product.size_chart' | t }} <span class="icon-right-arrow"></span></a>
+              <a href="javascript:;" class="size_chart" data-fancybox data-src="#size-chart{{product.id}}" data-type="inline" data-no-instant>{{ 'products.product.size_chart' | t }} <span class="icon-right-arrow"></span></a>
             {% endif %}
 
-
-            {% unless collection_handles contains 'coming-soon' %}
+            {% if collection_handles contains 'coming-soon' %}
+              <p class="modal_price">{{ 'collections.general.coming_soon' | t }}</p>
+            {% else %}
               <p class="modal_price" itemprop="offers" itemscope itemtype="http://schema.org/Offer">
                 <meta itemprop="priceCurrency" content="{{ shop.currency }}" />
                 <meta itemprop="seller" content="{{ shop.name | escape }}" />
                 <link itemprop="availability" href="http://schema.org/{% if variant.available %}InStock{% else %}OutOfStock{% endif %}">
-                <meta itemprop="itemCondition" content="New" />
+                <meta itemprop="itemCondition" itemtype="http://schema.org/OfferItemCondition" content="http://schema.org/NewCondition"/>
 
                 <span class="sold_out">{% if variant.available == false %}{{ 'products.product.sold_out' | t }}{% endif %}</span>
-                <span itemprop="price" content="{{ variant.price | money_without_currency }}" class="{% if variant.compare_at_price > variant.price %}sale{% endif %}">
+                <span itemprop="price" content="{{ variant.price | money_without_currency | remove: "," }}" class="{% if variant.compare_at_price > variant.price %}sale{% endif %}">
                   <span class="current_price {% if product.available == false %}hidden{% endif %}">
                     {% if variant.price > 0 %}
                       <span class="money">{{ variant.price | money }}</span>
@@ -142,7 +155,7 @@
               </p>
 
               {% include 'product-notify-me' %}
-            {% endunless %}
+            {% endif %}
 
             {% if section.settings.product_description_position == "top" %}
               {% if product.description != blank %}
@@ -163,14 +176,10 @@
                </div>
               {% endif %}
             {% endif %}
-            
-            <div id='judgeme_product_reviews' class='jdgm-widget jdgm-review-widget' data-product-title='{{ product.title | escape }}' data-id='{{ product.id }}'>{{ product.metafields.judgeme.widget }}</div>
 
-            {% comment %}
-            {% if settings.enable_shopify_review_comments and settings.review_position == "next_to_gallery" %}
-              <div id="shopify-product-reviews" data-id="{{product.id}}">{{ product.metafields.spr.reviews }}</div>
+            {% if section.settings.enable_reviews_in_description %}
+              {% include 'include-reviews', type: 'block' %}
             {% endif %}
-            {% endcomment %}
 
             {% if section.settings.display_collections or section.settings.display_tags or section.settings.display_type %}
               <div class="product_links">
@@ -227,246 +236,150 @@
           </div>
         {% endif %}
       </div>
-      <div class="sixteen columns">
-        {% if settings.enable_shopify_review_comments and settings.review_position == "below_gallery" %}
-          <div class="shopify-reviews">
-            <div id="shopify-product-reviews" data-id="{{product.id}}">{{ product.metafields.spr.reviews }}</div>
-          </div>
-        {% endif %}
-      </div>
     </div>
   </div>
 </div>
 
-  {% if section.settings.related_products_position == "above" and section.settings.display_related_products %}
-    {% include 'related-products' %}
-  {% endif %}
+  <div class="product-details__blocks clearfix">
+    {% if section.blocks.size > 0 %}
+      {% for block in section.blocks %}
 
-  <div class="product-details clearfix">
-    {% for block in section.blocks %}
-      {% if block.type == 'rich_text_and_image' %}
-        <div class="container">
-          <div class="twelve columns offset-by-two center" {{ block.shopify_attributes }} data-block-id="{{block.id}}">
-            {% if block.settings.image %}
-              <img class="rich-image" src="{{ block.settings.image | img_url: '1180x', scale: 2 }}" alt="{{ block.settings.image.alt }}">
+        <div {{ block.shopify_attributes }} class="block__{{ block.type }} block__{{ block.id }}
+        {% if block.type == "featured_collection" %}
+          featured-collection-section
+        {% endif %}
+        ">
+
+          {% if block.type == "blog_posts" %}
+            <!-- Blog posts -->
+            {% include 'include-featured-blog', type: 'block' %}
+
+          {% elsif block.type == "contact_form" %}
+            <!-- Contact form -->
+            {% include 'include-contact-form', type: 'block' %}
+
+          {% elsif block.type == "featured_video" %}
+            <!-- Featured video -->
+            {% include 'include-video', type: 'block' %}
+
+          {% elsif block.type == 'image_gallery' %}
+            <!-- Image gallery -->
+            {% include 'include-gallery', type: 'block' %}
+
+          {% elsif block.type == "image_with_text" %}
+            <!-- Image with text -->
+            {% if block.settings.layout == false %}
+              <div class="container standard--width">
             {% endif %}
-            {% if block.settings.title != blank %}
-              <h2 class="{{ block.settings.text_alignment }}">{{ block.settings.title }}</h2>
-              <div class="feature_divider {% if block.settings.text_alignment == "align_left" %}feature_divider_left{% endif %}"></div>
-            {% endif %}
-            <div class="{{ block.settings.text_size }} {{ block.settings.text_alignment }}">
-              {% if block.settings.content != blank %}
-                {{ block.settings.content }}
-              {% endif %}
-              {% if block.settings.button_label != blank %}
-                <a {% if block.settings.button_link != blank %} href="{{ block.settings.button_link }}" {% endif %} class="action_button block_button">
-                  {{ block.settings.button_label }}
-                </a>
-              {% endif %}
-            </div>
-          </div>
-        </div>
-      {% endif %}
-
-      {% if block.type == 'image_gallery' %}
-        <div class="container">
-          <div class="sixteen columns" {{ block.shopify_attributes }} data-block-id="{{block.id}}">
-            <div class="one-third column alpha thumbnail">
-              {% if block.settings.product_detail_image_1 %}
-                <a href="{{ block.settings.product_detail_image_1 | img_url: '1520x' }}" class="lightbox" rel="detail-gallery">
-                  <img src="{{ block.settings.product_detail_image_1 | img_url: '760x' }}" alt="{{ block.settings.product_detail_image_1.alt }}">
-                </a>
-              {% else %}
-                {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
-              {% endif %}
-            </div>
-            <div class="one-third column thumbnail">
-              {% if block.settings.product_detail_image_2 %}
-                <a href="{{ block.settings.product_detail_image_2 | img_url: '1520x' }}" class="lightbox" rel="detail-gallery">
-                  <img src="{{ block.settings.product_detail_image_2 | img_url: '760x' }}" alt="{{ block.settings.product_detail_image_2.alt }}">
-                </a>
-              {% else %}
-                {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
-              {% endif %}
-            </div>
-            <div class="one-third column omega thumbnail">
-              {% if block.settings.product_detail_image_3 %}
-                <a href="{{ block.settings.product_detail_image_3 | img_url: '1520x' }}" class="lightbox" rel="detail-gallery">
-                  <img src="{{ block.settings.product_detail_image_3 | img_url: '760x' }}" alt="{{ block.settings.product_detail_image_3.alt }}">
-                </a>
-              {% else %}
-                {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
-              {% endif %}
-            </div>
-          </div>
-        </div>
-      {% endif %}
-
-      {% if block.type == 'image_with_text' %}
-        <div class="container">
-          <div class="sixteen columns" {{ block.shopify_attributes }} data-block-id="{{block.id}}">
-            <section class="featured-link--section featured-link--image section-{{ forloop.index }}">
-
-              {% capture image_layout %}
-                <div class="featured-link--half featured-link--image">
+            <div class="image-with-text
+              featured_collections
+              clearfix across-1 image-align--{{ block.settings.frontpage_image_position }}">
+              <section class="featured-link--section featured-link--image section-{{ forloop.index }}">
+                <div class="featured-link--half featured-link--image {% if block.settings.layout == false %}featured-link--margin{% endif %} image-crop--{{ block.settings.image_crop }}">
                   <div class="featured-link--wrap">
-                    {% if block.settings.image %}
-                      {{ block.settings.image | img_url: '1024x' | img_tag: block.settings.image.alt }}
-                    {% else %}
-                      {% capture i %}{% cycle "1", "2", "3", "4", "5", "6" %}{% endcapture %}
-                      {{ 'collection-' | append: i | placeholder_svg_tag: 'placeholder-svg' }}
+                    <a {% if block.settings.link != blank %}href="{{ block.settings.link }}"{% endif %} title="{{ block.settings.title }}">
+                      {% if block.settings.image %}
+                        {% include 'image-element', image: block.settings.image, alt: block.settings.image.alt %}
+                      {% else %}
+                        {% capture i %}{% cycle "1", "2", "3", "4", "5", "6" %}{% endcapture %}
+                        {{ 'collection-' | append: i | placeholder_svg_tag: 'placeholder-svg placeholder-svg--promotions' }}
+                      {% endif %}
+                    </a>
+                  </div>
+                </div>
+                <div class="featured-link--half">
+                  <div class="info text-align--{{block.settings.frontpage_text_align}}">
+                    <a {% if block.settings.link != blank %}href="{{ block.settings.link }}"{% endif %} class="collection_title">
+                      {{ block.settings.title }}
+                    </a>
+                    {% if block.settings.text != blank %}
+                      <div class="description">{{ block.settings.text }}</div>
+                    {% endif %}
+                    {% if block.settings.button_label != blank %}
+                      <a {% if block.settings.link != blank %}href="{{ block.settings.link }}"{% endif %} class="button">
+                        {{ block.settings.button_label }}
+                      </a>
                     {% endif %}
                   </div>
                 </div>
-              {% endcapture %}
-
-              {% if block.settings.layout == 'right' %}
-                {{ image_layout }}
-              {% endif %}
-
-              <div class="featured-link--half">
-                <div class="info text-align--{{block.settings.frontpage_text_align}}">
-                  <h3 class="detail_title">
-                    {{ block.settings.title }}
-                  </h3>
-                  {% if block.settings.text != blank %}
-                    <div class="description">{{ block.settings.text }}</div>
-                  {% endif %}
-                  {% if block.settings.button_label != blank %}
-                    <a {% if block.settings.button_link != blank %}href="{{ block.settings.button_link }}"{% endif %} class="action_button">
-                      {{ block.settings.button_label }}
-                    </a>
-                  {% endif %}
-                </div>
-              </div>
-
-              {% if block.settings.layout == 'left' %}
-                {{ image_layout }}
-              {% endif %}
-
-            </section>
-          </div>
-        </div>
-      {% endif %}
-
-      {% if block.type == 'divider' %}
-        <div class="container" style="padding: 0;">
-          <div class="sixteen columns">
-            <hr class="page-divider {% if block.settings.divider_border %}active-divider{% endif %}" style="{% if block.settings.divider_spacing %}margin: {{ block.settings.divider_spacing }}px 0px;{% endif %}">
-          </div>
-        </div>
-      {% endif %}
-
-      {% if block.type == 'image_with_text_overlay' %}
-
-        {% assign default = '1400x' %}
-        {% assign size1 = '480x' %}
-        {% assign size2 = '765x' %}
-        {% assign size3 = '900x' %}
-        {% assign size4 = '1000x' %}
-        {% assign size5 = '1100x' %}
-        {% assign size6 = '1300x' %}
-        {% assign size7 = '1500x' %}
-        {% assign size8 = '1700x' %}
-        {% assign size9 = '1900x' %}
-        {% assign size10 = '2000x' %}
-
-        <div id="banner-{{section.id}}" class="banner" {{ block.shopify_attributes }}>
-          {% if block.settings.image != nil %}
-            <img  src="{{ block.settings.image | img_url: '100x', format: 'pjpg' }}"
-                  alt="{{ block.settings.image.alt | escape }}"
-                  class="lazyload {{ settings.image_loading_style }}"
-                  sizes="100vw"
-                  data-src="{{ block.settings.image | img_url: default, format: 'pjpg' }}"
-                  srcset="
-                  {{ block.settings.image | img_url: default, format: 'pjpg' }} {{default | replace: 'x', 'w'}},
-                  {{ block.settings.image | img_url: size1, format: 'pjpg' }} {{size1 | replace: 'x', 'w'}},
-                  {{ block.settings.image | img_url: size2, format: 'pjpg' }} {{size2 | replace: 'x', 'w'}},
-                  {{ block.settings.image | img_url: size3, format: 'pjpg' }} {{size3 | replace: 'x', 'w'}},
-                  {{ block.settings.image | img_url: size4, format: 'pjpg' }} {{size4 | replace: 'x', 'w'}},
-                  {{ block.settings.image | img_url: size5, format: 'pjpg' }} {{size5 | replace: 'x', 'w'}},
-                  {{ block.settings.image | img_url: size6, format: 'pjpg' }} {{size6 | replace: 'x', 'w'}},
-                  {{ block.settings.image | img_url: size7, format: 'pjpg' }} {{size7 | replace: 'x', 'w'}},
-                  {{ block.settings.image | img_url: size8, format: 'pjpg' }} {{size8 | replace: 'x', 'w'}},
-                  {{ block.settings.image | img_url: size9, format: 'pjpg' }} {{size9 | replace: 'x', 'w'}},
-                  {{ block.settings.image | img_url: size10, format: 'pjpg' }} {{size10 | replace: 'x', 'w'}}"
-
-                   />
-          {% else %}
-            {{ 'lifestyle-1' | placeholder_svg_tag: 'placeholder-svg placeholder-svg--banner' }}
-          {% endif %}
-          {% unless block.settings.button1_link != blank and block.settings.button2_link != blank %}
-            {% if block.settings.button1_link != blank %}
-              <a href="{{ block.settings.button1_link }}" class="banner-full-link">
-                {{ block.settings.title }}
-              </a>
-            {% elsif block.settings.button2_link != blank %}
-              <a href="{{ block.settings.button2_link }}" class="banner-full-link">
-                {{ block.settings.title }}
-              </a>
-            {% endif %}
-          {% endunless %}
-          {% unless block.settings.pretext == blank and block.settings.title == blank and block.settings.subtitle == blank and block.settings.button1 == blank and block.settings.button2 == blank %}
-            <div class="position-{{ block.settings.text_position }} caption js-caption">
-              <div class="caption-content caption-background-{{ block.settings.caption_background }} caption-transparency-{{ block.settings.caption_background_transparency }} align-{{block.settings.text_align }}">
-                {% if block.settings.pretext != blank %}
-                  <div class="pretext">
-                    {{ block.settings.pretext }}
-                  </div>
-                {% endif %}
-                {% if block.settings.title != blank %}
-                  <p class="headline">
-                    {{ block.settings.title }}
-                  </p>
-                {% endif %}
-                {% if block.settings.subtitle != blank %}
-                  <div class="subtitle">
-                    {{ block.settings.subtitle }}
-                  </div>
-                {% endif %}
-                {% if block.settings.button1 != blank %}
-                  <a {% if block.settings.button1_link != blank %}href="{{ block.settings.button1_link }}"{% endif %} class="action_button first_button highlight-{{ block.settings.button1_highlight }}">
-                    {{ block.settings.button1 }}
-                  </a>
-                {% endif %}
-                {% if block.settings.button2 != blank %}
-                  <a {% if block.settings.button2_link != blank %}href="{{ block.settings.button2_link }}"{% endif %} class="action_button second_button highlight-{{ block.settings.button2_highlight }}">
-                    {{ block.settings.button2 }}
-                  </a>
-                {% endif %}
-              </div>
+              </section>
             </div>
-          {% endunless %}
-        </div>
-      {% endif %}
+            {% if block.settings.layout == false %}
+              </div>
+            {% endif %}
 
-    {% endfor %}
+            {% if block.settings.layout == false %}
+              <style>
+                .standard--width .featured-link--margin {
+                  margin-left: 0%;
+                  margin-right: 3%;
+                }
+
+                .standard--width .image-align--right .featured-link--margin {
+                  margin-left: 3%;
+                  margin-right: 0%;
+                }
+
+                .standard--width .featured-link--half {
+                  width: 45%;
+                }
+              </style>
+            {% endif %}
+
+          {% elsif block.type == 'map' %}
+            <!-- Map -->
+            {% include 'include-map', type: 'block' %}
+
+          {% elsif block.type == "page" %}
+            <!-- Page -->
+            {% include 'include-content-page', type: 'block' %}
+
+          {% elsif block.type == 'quote' %}
+            <!-- Quote -->
+            {% include 'include-quote', type: 'block' %}
+
+          {% elsif block.type == "rich_text_and_image" %}
+            <!-- Rich text and image -->
+            {% include 'include-featured-text', type: 'block' %}
+
+          {% elsif block.type == 'product_reviews' %}
+            <!-- Reviews -->
+            <div class="container">
+              {% include 'include-reviews', type: 'block' %}
+            </div>
+
+          {% elsif block.type == 'divider' %}
+            <!-- Divider -->
+            {% include 'include-divider', type: 'block' %}
+
+          {% elsif block.type == "featured_collection" %}
+            <!-- Featured collection -->
+            {% include 'include-featured-collection', type: 'block' %}
+
+          {% elsif block.type == "image_with_text_overlay" %}
+            <!-- Image with text overlay -->
+            {% include 'include-image-with-text-overlay', type: 'block' %}
+
+          {% elsif block.type == "recently_viewed_products" %}
+            <!-- Recently Viewed Products -->
+            {% include 'include-recently-viewed', type: 'block' %}
+
+          {% elsif block.type == "related_products" %}
+            <!-- Related Products -->
+            {% include 'include-related-products', type: 'block' %}
+
+          {% elsif block.type == "custom_html" %}
+            <!--Custom HTML -->
+            {% include 'include-custom-html', type: 'block' %}
+
+          {% endif %}
+        </div>
+      {% endfor %}
+    {% endif %}
   </div>
 
-  {% if settings.enable_shopify_review_comments and settings.review_position == "below_product_details" %}
-    <div class="container">
-      <div class="sixteen columns">
-        <div class="shopify-reviews">
-          <div id="shopify-product-reviews" data-id="{{product.id}}">{{ product.metafields.spr.reviews }}</div>
-        </div>
-      </div>
-    </div>
-  {% endif %}
-
-  {% if section.settings.related_products_position == "below" %}
-    {% if section.settings.display_related_products %}
-      {% include 'related-products' %}
-    {% else %}
-      </div>
-    {% endif %}
-  {% endif %}
-
-  {% if section.settings.display_recently_viewed %}
     </div><!-- closes <div class="container main content"> -->
-      {% include 'recently-viewed' %}
-  {% else %}
-    </div><!-- closes <div class="container main content"> -->
-  {% endif %}
+
 
 </div>
 </div>
@@ -474,8 +387,9 @@
 {% schema %}
 
 {
-  "name": "Product",
-  "class": "product-template product-details-template",
+  "name": "Product | details",
+  "class": "product-template product-details-section",
+  "max_blocks": 20,
   "settings": [
     {
       "type": "header",
@@ -542,15 +456,19 @@
       "type": "select",
       "id": "thumbnail_position",
       "label": "Thumbnail position",
-      "default": "bottom-thumbnails",
+      "default": "bottom-slider",
       "options": [
+        {
+          "value": "bottom-thumbnails",
+          "label": "Bottom (grid)"
+        },
+        {
+          "value": "bottom-slider",
+          "label": "Bottom (slider)"
+        },
         {
           "value": "left-thumbnails",
           "label": "Left"
-        },
-        {
-          "value": "bottom-thumbnails",
-          "label": "Bottom"
         },
         {
           "value": "right-thumbnails",
@@ -582,6 +500,13 @@
       "id": "display_savings",
       "label": "Show price savings",
       "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_payment_button",
+      "label": "Show dynamic checkout button",
+      "default": true,
+      "info": "Each customer will see their preferred payment method from those available on your store, such as PayPal or Apple Pay. [Learn more](https:\/\/help.shopify.com\/manual\/using-themes\/change-the-layout\/dynamic-checkout)"
     },
     {
       "type": "checkbox",
@@ -621,232 +546,159 @@
     },
     {
       "type": "header",
-      "content": "Related products"
-    },
-    {
-      "type": "checkbox",
-      "id": "display_related_products",
-      "label": "Show related products ([?](https:\/\/help.outofthesandbox.com\/hc\/en-us\/articles\/115006909487-Related-Products))"
-    },
-    {
-      "type": "radio",
-      "id": "related_products_style",
-      "label": "Layout",
-      "default": "grid",
-      "options": [
-        {
-          "value": "slider",
-          "label": "Slider"
-        },
-        {
-          "value": "grid",
-          "label": "Grid"
-        }
-      ]
-    },
-    {
-      "type": "select",
-      "id": "related_products_limit",
-      "label": "Product limit",
-      "default": "12",
-    "options": [
-        {
-          "value": "3",
-          "label": "3"
-        },
-        {
-          "value": "4",
-          "label": "4"
-        },
-        {
-          "value": "5",
-          "label": "5"
-        },
-        {
-          "value": "6",
-          "label": "6"
-        },
-        {
-          "value": "8",
-          "label": "8"
-        },
-        {
-          "value": "10",
-          "label": "10"
-        },
-        {
-          "value": "12",
-          "label": "12"
-        },
-        {
-          "value": "15",
-          "label": "15"
-        },
-        {
-          "value": "20",
-          "label": "20"
-        },
-        {
-          "value": "24",
-          "label": "24"
-        },
-        {
-          "value": "48",
-          "label": "48"
-        }
-      ]
-    },
-    {
-      "type": "select",
-      "id": "products_per",
-      "label": "Products per row",
-      "default": "3",
-      "options": [
-        {
-          "value": "3",
-          "label": "3"
-        },
-        {
-          "value": "4",
-          "label": "4"
-        },
-        {
-          "value": "5",
-          "label": "5"
-        }
-      ]
-    },
-    {
-      "type": "radio",
-      "id": "related_products_position",
-      "label": "Position",
-      "options": [
-        {
-          "value": "above",
-          "label": "Above content"
-        },
-        {
-          "value": "below",
-          "label": "Below content"
-        }
-      ],
-      "default": "below"
-    },
-    {
-      "type": "header",
-      "content": "Recently viewed products"
+      "content": "Product reviews"
     },
     {
       "type": "paragraph",
-      "content": "To test the recently viewed products, view your online store outside of the Editor and visit multiple product pages ([?](https:\/\/help.outofthesandbox.com\/hc\/en-us\/articles\/115008765228))"
+      "content": "Reviews app must be enabled. [Learn more](https://help.outofthesandbox.com/hc/en-us/articles/360008549274#section2)"
     },
     {
       "type": "checkbox",
-      "id": "display_recently_viewed",
-      "label": "Show recently viewed products",
+      "id": "enable_shopify_product_badges",
+      "label": "Display star rating on product",
       "default": false
     },
     {
-      "type": "text",
-      "id": "rv_title",
-      "label": "Title",
-      "default": "Recently Viewed Items"
-    },
-    {
-      "type": "radio",
-      "id": "rv_products_style",
-      "label": "Layout",
-      "default": "grid",
-      "options": [
-        {
-          "value": "slider",
-          "label": "Slider"
-        },
-        {
-          "value": "grid",
-          "label": "Grid"
-        }
-      ]
-    },
-    {
-      "type": "select",
-      "id": "rv_max_display",
-      "label": "Products limit",
-      "default": "4",
-      "options": [
-        {
-          "value": "3",
-          "label": "3"
-        },
-        {
-          "value": "4",
-          "label": "4"
-        },
-        {
-          "value": "5",
-          "label": "5"
-        },
-        {
-          "value": "6",
-          "label": "6"
-        },
-        {
-          "value": "7",
-          "label": "7"
-        },
-        {
-          "value": "8",
-          "label": "8"
-        },
-        {
-          "value": "9",
-          "label": "9"
-        },
-        {
-          "value": "10",
-          "label": "10"
-        },
-        {
-          "value": "11",
-          "label": "11"
-        },
-        {
-          "value": "12",
-          "label": "12"
-        }
-      ]
-    },
-    {
-      "type": "select",
-      "id": "rv_per",
-      "label": "Products per row",
-      "default": "4",
-      "options": [
-        {
-          "value": "3",
-          "label": "3"
-        },
-        {
-          "value": "4",
-          "label": "4"
-        },
-        {
-          "value": "5",
-          "label": "5"
-        }
-      ]
+      "type": "checkbox",
+      "id": "enable_reviews_in_description",
+      "label": "Show reviews in product description area",
+      "default": false
     }
   ],
-  "max_blocks": 16,
   "blocks": [
+    {
+      "type": "blog_posts",
+      "name": "Blog posts",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Blog posts"
+        },
+        {
+          "type": "blog",
+          "id": "blog_widget_select",
+          "label": "Blog"
+        },
+        {
+          "type": "range",
+          "id": "home_page_articles",
+          "label": "Posts",
+          "min": 2,
+          "max": 4,
+          "step": 1,
+          "default": 3
+        },
+        {
+          "type": "checkbox",
+          "id": "blog_tags",
+          "label": "Show blog post tags"
+        },
+        {
+          "type": "checkbox",
+          "id": "blog_author",
+          "label": "Show author"
+        },
+        {
+          "type": "checkbox",
+          "id": "blog_date",
+          "label": "Show date",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "blog_comment_count",
+          "label": "Show comment count",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "read_more_link",
+          "label": "Show continue reading link for blog post excerpts",
+          "default": true
+        }
+      ]
+    },
+    {
+      "type": "contact_form",
+      "name": "Contact form",
+      "settings": [
+        {
+          "type": "text",
+          "id": "contact_heading",
+          "label": "Heading",
+          "default": "Get in touch"
+        },
+        {
+          "type": "text",
+          "id": "contact_subheading",
+          "label": "Subheading",
+          "default": "Leave a message"
+        },
+        {
+          "type": "richtext",
+          "id": "contact_content",
+          "label": "Text",
+          "default": "<p>Phasellus viverra nulla ut metus varius laoreet. Etiam sollicitudin, ipsum eu pulvinar rutrum, tellus ipsum laoreet sapien, quis venenatis ante odio sit amet eros. Etiam imperdiet imperdiet orci.</p>"
+        },
+        {
+          "type": "select",
+          "id": "contact_text_position",
+          "label": "Text position",
+          "default": "left",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "contact_text_alignment",
+          "label": "Text alignment",
+          "default": "left",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "custom_html",
+      "name": "Custom HTML",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "custom_html",
+          "label": "Custom HTML"
+        }
+      ]
+    },
     {
       "type": "divider",
       "name": "Divider",
       "settings": [
-        {
-          "type": "paragraph",
-          "content": "Add spacing in between your sections by using a divider."
-        },
         {
           "type": "range",
           "id": "divider_spacing",
@@ -854,7 +706,7 @@
           "max": 30,
           "step": 5,
           "unit": "px",
-          "label": "Spacing",
+          "label": "Space",
           "default": 20
         },
         {
@@ -866,24 +718,91 @@
       ]
     },
     {
+      "type": "product_reviews",
+      "name": "Product reviews",
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Reviews app must be enabled. [Learn more](https://help.outofthesandbox.com/hc/en-us/articles/360008549274#section2)"
+        }
+      ]
+    },
+    {
+      "type": "featured_collection",
+      "name": "Featured collection",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Featured collection"
+        },
+        {
+          "type": "checkbox",
+          "id": "collection_description",
+          "label": "Show collection description",
+          "default": false
+        },
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "radio",
+          "id": "collection_style",
+          "label": "Collection layout",
+          "default": "grid",
+          "options": [
+            {
+              "value": "slider",
+              "label": "Slider"
+            },
+            {
+              "value": "grid",
+              "label": "Grid"
+            }
+          ]
+        },
+        {
+          "type": "range",
+          "id": "products_per",
+          "label": "Products per row",
+          "min": 2,
+          "max": 7,
+          "step": 1,
+          "default": 3
+        },
+        {
+          "type": "range",
+          "id": "products_limit",
+          "label": "Limit products",
+          "min": 2,
+          "max": 50,
+          "step": 1,
+          "default": 48
+        }
+      ]
+    },
+    {
       "type": "image_gallery",
       "name": "Image gallery",
       "settings": [
         {
           "type": "image_picker",
-          "id": "product_detail_image_1",
+          "id": "detail_image_1",
           "label": "Image 1",
           "info": "760 x 500px recommended"
         },
         {
           "type": "image_picker",
-          "id": "product_detail_image_2",
+          "id": "detail_image_2",
           "label": "Image 2",
           "info": "760 x 500px recommended"
         },
         {
           "type": "image_picker",
-          "id": "product_detail_image_3",
+          "id": "detail_image_3",
           "label": "Image 3",
           "info": "760 x 500px recommended"
         }
@@ -894,48 +813,9 @@
       "name": "Image with text",
       "settings": [
         {
-          "type": "image_picker",
-          "id": "image",
-          "label": "Image"
-        },
-        {
-          "type": "select",
+          "type": "checkbox",
           "id": "layout",
-          "label": "Layout",
-          "default": "left",
-          "options": [
-            {
-              "value": "right",
-              "label": "Image on left"
-            },
-            {
-              "value": "left",
-              "label": "Image on right"
-            }
-          ],
-          "default": "right"
-        },
-        {
-          "type": "text",
-          "id": "title",
-          "label": "Heading",
-          "default": "Headline"
-        },
-        {
-          "type": "richtext",
-          "id": "text",
-          "label": "Text",
-          "default": "<p>Vestibulum fringilla pede sit amet augue. Pellentesque habitant morbi tristique senecrutrum eu, nisl.</p>"
-        },
-        {
-          "type": "text",
-          "id": "button_label",
-          "label": "Button label"
-        },
-        {
-          "type": "url",
-          "id": "button_link",
-          "label": "Button link"
+          "label": "Wide display"
         },
         {
           "type": "select",
@@ -954,8 +834,76 @@
               "value": "right",
               "label": "Right"
             }
-          ],
-          "default": "left"
+          ]
+        },
+        {
+          "type": "select",
+          "id": "frontpage_image_position",
+          "label": "Image position",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ]
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image",
+          "info": "1024 x 1024px recommended"
+        },
+        {
+          "type": "select",
+          "id": "image_crop",
+          "label": "Image cropping",
+          "default": "none",
+          "info": "Only applied when text area is taller than image.",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "none",
+              "label": "None"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Your headline"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "default": "<p>Promotion description appears here.</p>"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "default": "View all"
         }
       ]
     },
@@ -963,6 +911,12 @@
       "type": "image_with_text_overlay",
       "name": "Image with text overlay",
       "settings": [
+        {
+          "type": "checkbox",
+          "id": "wide_display",
+          "label": "Wide display",
+          "default": true
+        },
         {
           "type": "image_picker",
           "id": "image",
@@ -984,7 +938,7 @@
         {
           "type": "richtext",
           "id": "subtitle",
-          "label": "Subheading",
+          "label": "Text",
           "default": "<p>Customize this section</p>"
         },
         {
@@ -1045,7 +999,7 @@
         {
           "type": "url",
           "id": "button1_link",
-          "label": "First button link"
+          "label": "First link"
         },
         {
           "type": "checkbox",
@@ -1060,12 +1014,220 @@
         {
           "type": "url",
           "id": "button2_link",
-          "label": "Second button link"
+          "label": "Second link"
         },
         {
           "type": "checkbox",
           "id": "button2_highlight",
           "label": "Highlight second button"
+        }
+      ]
+    },
+    {
+      "type": "map",
+      "name": "Map",
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "wide_display",
+          "label": "Wide display",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "map_address",
+          "label": "Address",
+          "info": "Google Maps will find the exact location"
+        },
+        {
+          "type": "range",
+          "id": "map_height",
+          "min": 300,
+          "max": 600,
+          "step": 10,
+          "unit": "px",
+          "label": "Map height",
+          "default": 400
+        },
+        {
+          "type": "range",
+          "id": "zoom_level",
+          "min": 1,
+          "max": 20,
+          "step": 1,
+          "unit": "x",
+          "label": "Map zoom level",
+          "default": 16
+        },
+        {
+          "type": "image_picker",
+          "id": "map_image",
+          "label": "Image",
+          "info": "Displayed when map isn't loaded"
+        },
+        {
+          "type": "header",
+          "content": "API key"
+        },
+        {
+          "type": "text",
+          "id": "api_key",
+          "label": "Google Maps API key",
+          "info": "You’ll need to [register a Google Maps API Key](https://help.shopify.com/manual/using-themes/troubleshooting/map-section-api-key) to display the map"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_pin",
+          "label": "Show pin",
+          "info": "Requires use of API key",
+          "default": true
+        },
+        {
+          "type": "select",
+          "id": "map_style",
+          "label": "Map color scheme",
+          "options": [
+            {
+              "value": "default",
+              "label": "Default"
+            },
+            {
+              "value": "aubergine",
+              "label": "Aubergine"
+            },
+            {
+              "value": "night",
+              "label": "Night"
+            },
+            {
+              "value": "retro",
+              "label": "Retro"
+            },
+            {
+              "value": "silver",
+              "label": "Silver"
+            }
+          ],
+          "default": "default",
+          "info": "Requires use of API key"
+        }
+      ]
+    },
+    {
+      "type": "page",
+      "name": "Page",
+      "settings": [
+        {
+          "type": "page",
+          "id": "content_page",
+          "label": "Content page"
+        }
+      ]
+    },
+    {
+      "type": "quote",
+      "name": "Quote",
+      "settings": [
+        {
+          "type": "text",
+          "id": "quote_text",
+          "label": "Text",
+          "default": "40% of online shoppers abandon a site that takes more than 3 seconds to load"
+        },
+        {
+          "type": "url",
+          "id": "quote_link",
+          "label": "Link"
+        }
+      ]
+    },
+    {
+      "type": "recently_viewed_products",
+      "name": "Recently viewed products",
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "To test the recently viewed products, view your online store outside of the Editor and visit multiple product pages. [Learn more](https:\/\/help.outofthesandbox.com\/hc\/en-us\/articles\/115008765228)"
+        },
+        {
+          "type": "text",
+          "id": "rv_title",
+          "label": "Heading",
+          "default": "Recently viewed products"
+        },
+        {
+          "type": "radio",
+          "id": "rv_products_style",
+          "label": "Layout",
+          "default": "grid",
+          "options": [
+            {
+              "value": "slider",
+              "label": "Slider"
+            },
+            {
+              "value": "grid",
+              "label": "Grid"
+            }
+          ]
+        },
+        {
+          "type": "range",
+          "id": "rv_max_display",
+          "label": "Products limit",
+          "min": 3,
+          "max": 12,
+          "step": 1,
+          "default": 6
+        },
+        {
+          "type": "range",
+          "id": "rv_per",
+          "label": "Products per row",
+          "min": 3,
+          "max": 5,
+          "step": 1,
+          "default": 4
+        }
+      ]
+    },
+    {
+      "type": "related_products",
+      "name": "Related products",
+      "settings": [
+        {
+          "type": "radio",
+          "id": "related_products_style",
+          "label": "Layout",
+          "default": "grid",
+          "options": [
+            {
+              "value": "slider",
+              "label": "Slider"
+            },
+            {
+              "value": "grid",
+              "label": "Grid"
+            }
+          ]
+        },
+        {
+          "type": "range",
+          "id": "related_products_limit",
+          "label": "Limit products",
+          "min": 2,
+          "max": 50,
+          "step": 1,
+          "default": 12
+        },
+        {
+          "type": "range",
+          "id": "products_per",
+          "label": "Products per row",
+          "min": 2,
+          "max": 7,
+          "step": 1,
+          "default": 3
         }
       ]
     },
@@ -1082,13 +1244,29 @@
           "type": "text",
           "id": "title",
           "label": "Heading",
-          "default": "This is an example headline"
+          "default": "Talk about your brand"
         },
         {
           "type": "richtext",
           "id": "content",
           "label": "Text",
-          "default": "<p>Vestibulum fringilla pede sit amet augue. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Integer tincidunt. Vestibulum turpis sem, aliquet eget, lobortis pellentesque, rutrum eu, nisl. Suspendisse potenti.</p>"
+          "default": "<p>Use this text to share information about your brand with your customers.</p><p>Describe a product, share announcements, or welcome customers to your store.</p>"
+        },
+        {
+          "type": "select",
+          "id": "text_size",
+          "label": "Text size",
+          "options": [
+            {
+              "value": "regular_text",
+              "label": "Regular"
+            },
+            {
+              "value": "featured_text",
+              "label": "Large"
+            }
+          ],
+          "default": "featured_text"
         },
         {
           "type": "select",
@@ -1114,7 +1292,181 @@
         {
           "type": "url",
           "id": "button_link",
-          "label": "Button link"
+          "label": "link"
+        }
+      ]
+    },
+    {
+      "type": "featured_video",
+      "name": "Video",
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "wide_display",
+          "label": "Wide display",
+          "default": true
+        },
+        {
+          "type": "select",
+          "id": "aspect_ratio",
+          "label": "Aspect ratio",
+          "options": [
+            {
+              "value": "16:9",
+              "label": "16:9"
+            },
+            {
+              "value": "4:3",
+              "label": "4:3"
+            }
+          ],
+          "default": "16:9"
+        },
+        {
+          "type": "checkbox",
+          "id": "autoplay",
+          "label": "Autoplay video",
+          "default": false,
+          "info": "Limited browser support for autoplaying video. [Learn more](https:\/\/help.outofthesandbox.com\/hc\/en-us\/articles\/360000661568-Why-won-t-my-video-autoplay-)"
+        },
+        {
+          "type": "checkbox",
+          "id": "autoloop",
+          "label": "Autoloop video",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "video_dark_overlay",
+          "label": "Darken video"
+        },
+        {
+          "type": "video_url",
+          "id": "video",
+          "label": "Video link",
+          "accept": ["youtube", "vimeo"],
+          "default": "https://www.youtube.com/watch?v=_9VUPq3SxOc"
+        },
+        {
+          "type": "text",
+          "id": "mp4",
+          "label": "HTML5 MP4 File URL"
+        },
+        {
+          "type": "text",
+          "id": "ogv",
+          "label": "HTML5 OGV File URL (optional)"
+        },
+        {
+          "type": "header",
+          "content": "Content"
+        },
+       {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image",
+          "info": "1600 x 900px recommended"
+        },
+        {
+          "type": "checkbox",
+          "id": "display_text_over_video",
+          "label": "Show text on video",
+          "default": false
+        },
+        {
+          "type": "richtext",
+          "id": "pretext",
+          "label": "Preheading"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading"
+        },
+        {
+          "type": "richtext",
+          "id": "subtitle",
+          "label": "Subheading"
+        },
+        {
+          "type": "select",
+          "id": "text_position",
+          "label": "Text position",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ],
+          "default": "center"
+        },
+        {
+          "type": "select",
+          "id": "text_align",
+          "label": "Text alignment",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ],
+          "default": "center"
+        },
+        {
+          "type": "checkbox",
+          "id": "caption_background",
+          "label": "Display solid text background"
+        },
+        {
+          "type": "checkbox",
+          "id": "caption_background_transparency",
+          "label": "Enable background transparency"
+        },
+        {
+          "type": "text",
+          "id": "button1_label",
+          "label": "First button label"
+        },
+        {
+          "type": "url",
+          "id": "button1_link",
+          "label": "First link"
+        },
+        {
+          "type": "checkbox",
+          "id": "button1_highlight",
+          "label": "Highlight first button"
+        },
+        {
+          "type": "text",
+          "id": "button2_label",
+          "label": "Second button label"
+        },
+        {
+          "type": "url",
+          "id": "button2_link",
+          "label": "Second link"
+        },
+        {
+          "type": "checkbox",
+          "id": "button2_highlight",
+          "label": "Highlight second button"
         }
       ]
     }
@@ -1135,6 +1487,7 @@
       {
         "type": "divider",
         "settings": {
+          "divider_spacing": 0
         }
       },
       {
@@ -1157,11 +1510,6 @@
         }
       },
       {
-        "type": "divider",
-        "settings": {
-        }
-      },
-      {
         "type": "image_with_text",
         "settings": {
           "layout": "right",
@@ -1172,7 +1520,27 @@
         }
       },
       {
-        "type": "divider",
+        "type": "image_with_text",
+        "settings": {
+          "layout": "left",
+          "title": "Headline",
+          "text": "<p>Vestibulum fringilla pede sit amet augue. Pellentesque habitant morbi tristique senecrutrum eu, nisl.</p>",
+          "button_label": "Button",
+          "frontpage_text_align": "left"
+        }
+      },
+      {
+        "type": "image_with_text_overlay",
+        "settings": {
+          "pretext": "<p>This is</p>",
+          "title": "Your Headline",
+          "subtitle": "<p>Customize this section</p>",
+          "button1": "Button",
+          "text_position": "right"
+        }
+      },
+      {
+        "type": "contact_form",
         "settings": {
         }
       }

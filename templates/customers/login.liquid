@@ -1,4 +1,3 @@
-
 <a name="pagecontent" id="pagecontent"></a>
 
 <div class="sixteen columns clearfix collection_nav">
@@ -11,7 +10,7 @@
   <div class="six columns offset-by-five animated fadeInUp" id="login_form">
 
     {% form 'customer_login' %}
-      {{ form.errors | default_errors | strip_newlines }}
+      {{ form.errors | default_errors }}
 
       <label for="customer_email" class="login">{{ 'customer.login.email' | t }}</label>
       <input type="email" value="" name="customer[email]" id="customer_email" class="large" size="30"  autocorrect="off" autocapitalize="off" tabindex="1" />
@@ -35,16 +34,16 @@
           {{ 'customer.login.new_customer_label' | t }} {{ 'customer.login.sign_up_html' | t | customer_register_link }}
         </p>
       {% endunless %}
-    <input type="hidden" name="customer[tags]" value="ly#{% assign language = cart.attributes["language"] %}{% if language == nil %}{% assign language = shop.metafields["languages"]["default"] %}{% endif %}{{ language }}ly#"/>
     {% endform %}
 
-    {% if shop.checkout.guest_login %}
-      <span class="or"> {{ 'customer.login.or' | t }} </span>
-      {% form 'guest_login' %}
-        <input class="guest_button" type="submit" value="{{ 'customer.login.guest_title_html' | t }}" />
-    <input type="hidden" name="customer[tags]" value="ly#{% assign language = cart.attributes["language"] %}{% if language == nil %}{% assign language = shop.metafields["languages"]["default"] %}{% endif %}{{ language }}ly#"/>
-      {% endform %}
-    {% endif %}
+    <div class="large--right">
+      {% if shop.checkout.guest_login %}
+        <span class="or"> {{ 'customer.login.or' | t }} </span>
+        {% form 'guest_login' %}
+          <input class="guest_button" type="submit" value="{{ 'customer.login.guest_title_html' | t }}" />
+        {% endform %}
+      {% endif %}
+    </div>
   </div>
 
     <div id="recover-password" style='display:none'>
@@ -59,20 +58,26 @@
             {% assign reset_success = true %}
           {% endif %}
 
-          <div id="recover_email" class="clearfix large_form">
-            <label for="email" class="large">{{ 'customer.recover_password.email' | t }}</label>
-            <input type="email" value="" size="30" name="email" id="recover-email" class="large" autocorrect="off" autocapitalize="off" />
-          </div>
+          {% if reset_success %}
+            <p>
+              <em class="note">{{ 'customer.recover_password.success' | t }}</em>
+            </p>
+          {% else %}
+            <div id="recover_email" class="clearfix large_form">
+              <label for="email" class="large">{{ 'customer.recover_password.email' | t }}</label>
+              <input type="email" value="" size="30" name="email" id="recover-email" class="large" autocorrect="off" autocapitalize="off" />
+            </div>
+            <p>
+              <em class="note">{{ 'customer.recover_password.subtext' | t }}</em>
+            </p>
+            <div class="action_bottom">
+              <input class="btn action_button" type="submit" value="{{ 'customer.recover_password.submit' | t }}" />
+              <span class="note">{{ 'customer.recover_password.or' | t }} <a href="#" onclick="hideRecoverPasswordForm()">{{ 'customer.recover_password.cancel' | t }}</a></span>
+            </div>
+          {% endif %}
 
-          <p>
-            <em class="note">{{ 'customer.recover_password.subtext' | t }}</em>
-          </p>
 
-          <div class="action_bottom">
-            <input class="btn action_button" type="submit" value="{{ 'customer.recover_password.submit' | t }}" />
-            <span class="note">{{ 'customer.recover_password.or' | t }} <a href="#" onclick="hideRecoverPasswordForm()">{{ 'customer.recover_password.cancel' | t }}</a></span>
-          </div>
-        <input type="hidden" name="customer[tags]" value="ly#{% assign language = cart.attributes["language"] %}{% if language == nil %}{% assign language = shop.metafields["languages"]["default"] %}{% endif %}{{ language }}ly#"/>
+
         {% endform %}
       </div>
     </div>

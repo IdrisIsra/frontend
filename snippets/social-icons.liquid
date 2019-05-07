@@ -7,10 +7,6 @@
     <li><a href="{{ settings.facebook_link }}" title="{{ shop.name }} on Facebook" rel="me" target="_blank" class="icon-facebook"></a></li>
   {% endif %}
 
-  {% if settings.google_link != '' %}
-    <li><a href="{{ settings.google_link }}" title="{{ shop.name }} on Google+" rel="publisher" target="_blank" class="icon-gplus"></a></li>
-  {% endif %}
-
   {% if settings.youtube_link != '' %}
     <li><a href="{{ settings.youtube_link }}" title="{{ shop.name }} on YouTube" rel="me" target="_blank" class="icon-youtube"></a></li>
   {% endif %}
@@ -44,6 +40,6 @@
   {% endif %}
 
   {% if settings.email_link != '' %}
-    <li><a href="mailto:{{ settings.email_link }}" title="Email {{ shop.name }}" target="_blank" class="icon-mail"></a></li>
+    <li><a href="mailto:{{ settings.email_link }}" title="Email {{ shop.name }}" target="_blank" class="icon-email"></a></li>
   {% endif %}
 </ul>

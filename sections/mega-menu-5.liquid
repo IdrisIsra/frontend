@@ -24,10 +24,7 @@
                 <div class="mega-menu__image-caption-link">
                   <a {% if block.settings.image_link_top != blank %}href="{{ block.settings.image_link_top }}"{% endif %} >
                     {% if block.settings.image_top != nil %}
-                      <img  src="{{ block.settings.image_top | img_url: '500x' }}"
-                            alt="{{ block.settings.image_top.alt | escape }}"
-                            class="lazyload {{ settings.image_loading_style }}"
-                             />
+                      {% include 'image-element', image: block.settings.image_top, alt: block.settings.image_top.alt %}
                     {% endif %}
                     {% if block.settings.image_caption_top %}
                       <p>{{ block.settings.image_caption_top }}</p>
@@ -121,10 +118,7 @@
                 <div class="mega-menu__image-caption-link">
                   <a {% if block.settings.image_link_bottom != blank %}href="{{ block.settings.image_link_bottom }}"{% endif %} >
                     {% if block.settings.image_bottom != nil %}
-                      <img  src="{{ block.settings.image_bottom | img_url: '500x' }}"
-                            alt="{{ block.settings.image_bottom.alt | escape }}"
-                            class="lazyload {{ settings.image_loading_style }}"
-                             />
+                      {% include 'image-element', image: block.settings.image_bottom, alt: block.settings.image_bottom.alt %}
                     {% endif %}
                     {% if block.settings.image_caption_bottom %}
                       <p>{{ block.settings.image_caption_bottom }}</p>
@@ -161,10 +155,7 @@
           <li class="mobile-mega-menu_block"  >
             <a {% if block.settings.image_link_top != blank %}href="{{ block.settings.image_link_top }}"{% endif %} >
               {% if block.settings.image_top != nil %}
-                <img  src="{{ block.settings.image_top | img_url: '500x' }}"
-                      alt="{{ block.settings.image_top.alt | escape }}"
-                      class="lazyload {{ settings.image_loading_style }}"
-                       />
+                {% include 'image-element', image: block.settings.image_top, alt: block.settings.image_top.alt %}
               {% endif %}
               <p>{{ block.settings.image_caption_top }}</p>
             </a>
@@ -259,10 +250,7 @@
           <li class="mobile-mega-menu_block"  >
             <a {% if block.settings.image_link_bottom != blank %}href="{{ block.settings.image_link_bottom }}"{% endif %} >
               {% if block.settings.image_bottom != nil %}
-                <img  src="{{ block.settings.image_bottom | img_url: '500x' }}"
-                      alt="{{ block.settings.image_bottom.alt | escape }}"
-                      class="lazyload {{ settings.image_loading_style }}"
-                       />
+                {% include 'image-element', image: block.settings.image_bottom, alt: block.settings.image_bottom.alt %}
               {% endif %}
               <p>{{ block.settings.image_caption_bottom }}</p>
             </a>
@@ -397,7 +385,38 @@
         }
       ]
     }
-  ]
+  ],
+  "default": {
+    "blocks": [
+      {
+        "type": "column",
+        "settings": {
+          "richtext_top": "<p>Add description, images, menus and links to your mega menu</p>"
+        }
+      },
+      {
+        "type": "column",
+        "settings": {
+          "richtext_top": "<p>A column with no settings can be used as a spacer</p>"
+        }
+      },
+      {
+        "type": "column"
+      },
+      {
+        "type": "column",
+        "settings": {
+          "richtext_top": "<p>Link to your collections, sales and even external links</p>"
+        }
+      },
+      {
+        "type": "column",
+        "settings": {
+          "richtext_top": "<p>Add up to five columns</p>"
+        }
+      }
+    ]
+  }
 }
 
 {% endschema %}

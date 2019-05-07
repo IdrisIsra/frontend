@@ -1,17 +1,37 @@
-
 {% comment %}
 ** Featured products - homepage partial **
 - Draggable section
 - Uses blocks
 {% endcomment %}
-<section id="home-four-banner">
-  <div class="container">
-    <div class="home-banner"><a href="/apps/help-center"><img src="{{ "same_day_cargo_banner.png" | asset_url }}"/></a></div>
-    <div class="home-banner"><a href="/apps/help-center"><img src="{{ "easy_return_banner.png" | asset_url }}"/></a></div>
-    <div class="home-banner"><a href="/apps/help-center"><img src="{{ "credit_card_installment_banner.png" | asset_url }}"/></a></div>
-    <div class="home-banner"><a href="/apps/help-center"><img src="{{ "pay_at_the_door_banner.png" | asset_url }}"/></a></div>
-  </div>
-</section>
+
+{% if section.settings.wide_display == false %}
+    <div class="container">
+      <div class="sixteen columns">
+  {% endif %}
+        
+        <div class="Benefits-bar">
+          <ul class="Benefits-bar__list">
+            <li class="Benefits-bar__item">
+              <span class="Benefits-bar__text"><ly-as-13751452>For the best shopping experience:</ly-as-13751452></span>
+            </li>
+            <li class="Benefits-bar__item">
+              <img src="{{ "delivery.png" | asset_url }}" class="icon" aria-hidden="true" width="35" height="35">
+
+              <span class="Benefits-bar__text"><ly-as-13751453>Free Shipping</ly-as-13751453></span>
+            </li>
+            <li class="Benefits-bar__item">
+              <img src="{{ "ssl.png" | asset_url }}" class="icon" aria-hidden="true" width="35" height="35">
+
+              <span class="Benefits-bar__text"><ly-as-13751454>SSL Certified</ly-as-13751454></span>
+            </li>
+            <li class="Benefits-bar__item">
+              <img src="{{ "securepayment.png" | asset_url }}" class="icon" aria-hidden="true" width="35" height="35">
+
+              <span class="Benefits-bar__text"><ly-as-13751455>Secure Payments</ly-as-13751455></span>
+            </li>
+          </ul>
+        </div>
+
 {% if section.blocks.size > 0 %}
   <section class="collection-in-detail">
       <div class="clearfix frontpage_product_stagger--{{ section.settings.frontpage_product_stagger }}" itemtype="http://schema.org/ItemList">
@@ -28,7 +48,6 @@
         <div itemprop="itemListElement" itemscope itemtype="http://schema.org/Product"
              class="product-{{ product.id }} section clearfix product_section slideshow_animation--{{section.settings.slideshow_animation}}"
              data-slideshow-animation="{{section.settings.slideshow_animation}}"
-             data-slideshow-speed="{{section.settings.slideshow_speed}}"
              data-block-id="{{block.id}}"
              {{ block.shopify_attributes }}>
 
@@ -74,8 +93,10 @@
                 <a href="{{ product.url }}">{{ product.title }}</a>
               </h1>
 
-              {% if settings.enable_shopify_product_badges and settings.enable_shopify_review_comments %}
-                <span class="shopify-product-reviews-badge" data-id="{{ product.id }}"></span>
+              {% if section.settings.enable_shopify_product_badges %}
+                <div class="shopify-reviews reviewsVisibility--{{settings.enable_shopify_review_comments}}">
+                  <span class="shopify-product-reviews-badge" data-id="{{ product.id }}"></span>
+                </div>
               {% endif %}
               <div class="feature_divider"></div>
 
@@ -92,12 +113,12 @@
               {% if product_tags contains 'meta-size-chart-' %}
                 {% for tag in product.tags %}
                   {% if tag contains 'meta-size-chart-' %}
-                    <a href="#size-chart{{product.id}}" class="size_chart" data-remodal-target="size-chart{{product.id}}">{{ 'products.product.size_chart' | t }} <span class="icon-right-arrow"></span></a>
+                    <a href="javascript:;" class="size_chart" data-fancybox data-src="#size-chart{{product.id}}" data-type="inline" data-no-instant>{{ 'products.product.size_chart' | t }} <span class="icon-right-arrow"></span></a>
                     {% include 'popup-size-chart', product_id: product.id %}
                   {% endif %}
                 {% endfor %}
               {% elsif settings.size_chart != blank %}
-                <a href="#size-chart" class="size_chart" data-remodal-target="size-chart">{{ 'products.product.size_chart' | t }} <span class="icon-right-arrow"></span></a>
+                <a href="javascript:;" class="size_chart" data-fancybox data-src="#size-chart{{product.id}}" data-type="inline" data-no-instant>{{ 'products.product.size_chart' | t }} <span class="icon-right-arrow"></span></a>
               {% endif %}
 
               {% if collection_handles contains 'coming-soon' %}
@@ -108,7 +129,7 @@
                   <meta itemprop="priceCurrency" content="{{ shop.currency }}" />
                   <meta itemprop="seller" content="{{ shop.name | escape }}" />
                   <link itemprop="availability" href="http://schema.org/{% if product.available %}InStock{% else %}OutOfStock{% endif %}">
-                  <meta itemprop="itemCondition" content="New" />
+                  <meta itemprop="itemCondition" itemtype="http://schema.org/OfferItemCondition" content="http://schema.org/NewCondition"/>
 
                   <span class="sold_out">{% if variant.available == false %}{{ 'products.product.sold_out' | t }}{% endif %}</span>
                   <span itemprop="price" content="{{ variant.price | money_without_currency }}" class="{% if variant.compare_at_price > variant.price %}sale{% endif %}">
@@ -160,7 +181,7 @@
               </form>
             {% else %}
               {% unless collection_handles contains 'coming-soon' %}
-                <div class="js-product_section product_section">
+                <div class="js-product_section product_section" data-rv-handle="{{ product.handle }}">
                   {% include 'product-form' with 'product' %}
                 </div>
               {% endunless %}
@@ -174,7 +195,6 @@
                   </p>
                 </div>
               {% elsif section.settings.frontpage_display_description and product.description != blank %}
-                {% if product.available %}<hr />{% endif %}
                 <div class="description bottom" itemprop="description">
                   {{ product.description | split: '<!-- split -->' | first }}
                 </div>
@@ -188,12 +208,23 @@
   </section>
 {% endif %}
 
+{% if section.settings.wide_display == false %}
+    </div>
+  </div>
+{% endif %}
+
 {% schema %}
 {
   "name": "Featured products",
   "class": "featured-products-section",
   "max_blocks": 12,
   "settings": [
+    {
+      "type": "checkbox",
+      "id": "wide_display",
+      "label": "Wide display",
+      "default": true
+    },
     {
       "type": "checkbox",
       "id": "frontpage_product_stagger",
@@ -203,6 +234,12 @@
     {
       "type": "header",
       "content": "Image"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_product_lightbox",
+      "label": "Enable product gallery popup",
+      "default": true
     },
     {
       "type": "checkbox",
@@ -246,9 +283,23 @@
     },
     {
       "type": "checkbox",
+      "id": "enable_shopify_product_badges",
+      "label": "Display star rating on product",
+      "info": "Reviews app must be enabled. [Learn more](https://help.outofthesandbox.com/hc/en-us/articles/360008549274#section2)",
+      "default": false
+    },
+    {
+      "type": "checkbox",
       "id": "display_savings",
       "label": "Show price savings",
       "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_payment_button",
+      "label": "Show dynamic checkout button",
+      "default": true,
+      "info": "Each customer will see their preferred payment method from those available on your store, such as PayPal or Apple Pay. [Learn more](https:\/\/help.shopify.com\/manual\/using-themes\/change-the-layout\/dynamic-checkout)"
     },
     {
       "type": "checkbox",

@@ -6,20 +6,8 @@
 {% endcomment %}
 
 {% if section.settings.image %}
-  {% capture sizes %}100x,480x,765x,1400x,2048x{% endcapture %}
-  {% assign sizes = sizes | split: ',' %}
-
   <header class="banner center page_banner dark-overlay-{{ section.settings.image_darken }}">
-    <img
-          src="{{ section.settings.image | img_url: sizes.first }}"
-          alt="{% if section.settings.image.alt != blank %}{{ section.settings.image.alt | escape }}{% else %}{{ 'collections.general.title' | t | escape }}{% endif %}"
-          class="lazyload {{ settings.image_loading_style }}"
-          sizes="100vw"
-          srcset="{%- for size in sizes -%}
-                    {{ section.settings.image | img_url: size, format: 'pjpg' }}
-                    {{ size | replace: "x", "w" }}{% unless forloop.last %},{% endunless %}
-                  {%- endfor -%}
-          " />
+    {% include 'image-element', image: section.settings.image, alt: section.settings.image.alt, stretch_width: true, progressive: true %}
       {% if section.settings.display_collection_title %}
         <div class="caption">
           <h1 class="headline">{{ 'collections.general.title' | t }}</h1>
@@ -66,83 +54,43 @@
 
     {% if sidebar %}
       {% include 'sidebar' %}
-      <div class="twelve columns list-collection-wrapper">
+      <div class="twelve columns list-collection-wrapper medium-down--one-whole">
     {% else %}
       <div class="sixteen columns list-collection-wrapper">
     {% endif %}
 
-      {% capture new_row %}
-          <br class="clear product_clear" />
-      {% endcapture %}
+    <div class="list-collections clearfix equal-columns--clear equal-columns--outside-trim">
 
       {% for collection in collections %}
         {% unless collection.handle == 'frontpage' %}
           {% capture collection_title %}{{ collection.title | escape }}{% endcapture %}
-          {% if sidebar %}
-            <div class="{% if collections_per_row == "2" %}six columns {% cycle 'alpha', 'omega' %}{% elsif collections_per_row == "3" %}four columns {% cycle 'alpha', '', 'omega' %}{% else %}three columns {% cycle 'alpha', '', '', 'omega' %}{% endif %} thumbnail {% cycle 'even', 'odd' %}">
+          <div class="
+          {% if collections_per_row == 2 %}
+            eight columns
+          {% elsif collections_per_row == 3 %}
+            one-third column
           {% else %}
-            <div class="{% if collections_per_row == "2" %}eight columns {% cycle 'alpha', 'omega' %}{% elsif collections_per_row == "3" %}one-third column {% cycle 'alpha', '', 'omega' %}{% else %}four columns {% cycle 'alpha', '', '', 'omega' %}{% endif %} thumbnail {% cycle 'even', 'odd' %}">
+            four columns
           {% endif %}
+          thumbnail {% cycle 'even', 'odd' %}
+          {% if settings.mobile_products_per_row == '1' %}
+            medium-down--one-half
+            small-down--one-whole
+          {% else %}
+            medium-down--one-half
+            small-down--one-half
+          {% endif %}">
 
         <div class="product-wrap">
+          <div class="image__container">
             {% if collection.image %}
-              {% if settings.align_height %}
-                {% assign collection_height = settings.collection_height | plus: 0 %}
-                {% assign product_aspect_ratio = collection.image.aspect_ratio | plus: 0 %}
-                {% assign product_set_width = product_aspect_ratio | times: collection_height %}
-
-                {% if collection.image.width >= collection.image.height %}
-                  {% assign align_height_value = 'width: 100%; height: auto;' %}
-                {% else %}
-                  {% assign align_height_value = 'width: 100%;' %}
-                {% endif %}
-
-              {% endif %}
-
-              <div class="image__container" style="{% if settings.align_height %} max-width: {{ product_set_width }}px; {% else %} max-width: {{ collection.image.width }}px; {% endif %}">
-
-                <img  src="{{ collection.image.src | collection_img_url: '100x' }}"
-                      class="lazyload {{ settings.image_loading_style }}"
-                      alt="{{ collection.title | escape }}"
-                      style="{{ align_height_value }} max-width: {{ collection.image.width }}px;"
-                      data-sizes="auto"
-                      data-src="{{ collection.image.src | collection_img_url: '1160x' }}"
-                      data-srcset=" {{ collection.image.src | collection_img_url: '1160x'}} 1160w,
-                                    {{ collection.image.src | collection_img_url: '760x'}} 760w,
-                                    {{ collection.image.src | collection_img_url: '472x'}} 472w,
-                                    {{ collection.image.src | collection_img_url: '380x' }} 380w,
-                                    {{ collection.image.src | collection_img_url: '236x' }} 236w"
-                      />
-              </div>
+              {% assign collection_image = collection.image.src %}
             {% else %}
-              {% if settings.align_height %}
-                {% assign collection_height = settings.collection_height | plus: 0 %}
-                {% assign product_aspect_ratio = collection.products.first.featured_image.aspect_ratio | plus: 0 %}
-                {% assign product_set_width = product_aspect_ratio | times: collection_height %}
-
-                {% if collection.products.first.featured_image.width >= collection.products.first.featured_image.height %}
-                  {% assign align_height_value = 'width: 100%; height: auto;' %}
-                {% else %}
-                  {% assign align_height_value = 'width: 100%;' %}
-                {% endif %}
-
-              {% endif %}
-
-              <div class="image__container" style="{% if settings.align_height %} max-width: {{ product_set_width }}px; {% else %} max-width: {{ collection.products.first.featured_image.width }}px; {% endif %}">
-                <img  src="{{ collection.products.first.featured_image | product_img_url: '100x' }}"
-                      class="lazyload {{ settings.image_loading_style }}"
-                      alt="{{ collection.title | escape }}"
-                      style="{{ align_height_value }} max-width: {{ collection.products.first.featured_image.width }}px;"
-                      data-sizes="auto"
-                      data-src="{{ collection.products.first.featured_image | product_img_url: '1160x' }}"
-                      data-srcset=" {{ collection.products.first.featured_image | product_img_url: '1160x'}} 1160w,
-                                    {{ collection.products.first.featured_image | product_img_url: '760x'}} 760w,
-                                    {{ collection.products.first.featured_image | product_img_url: '472x'}} 472w,
-                                    {{ collection.products.first.featured_image | product_img_url: '380x' }} 380w,
-                                    {{ collection.products.first.featured_image | product_img_url: '236x' }} 236w"
-                      />
-              </div>
+              {% assign collection_image = collection.products.first.featured_image %}
             {% endif %}
+            {% include 'image-element', image: collection_image, alt: collection.title, object_fit: section.settings.align_height, max_height: section.settings.collection_height %}
+          </div>
+
             <a href="{{ collection.url }}" title="{{ collection_title }}" class="hidden-product-link">{{ collection_title }}</a>
             {% if settings.thumbnail_hover_enabled %}
                 <div class="thumbnail-overlay">
@@ -160,21 +108,21 @@
             </a>
           </div>
         </div>
-
-          {% if collections_per_row == "2" %}
-            {% cycle '', new_row %}
-          {% elsif collections_per_row == "3" %}
-            {% cycle '', '', new_row %}
-          {% elsif collections_per_row == "4" %}
-            {% cycle '', '', '', new_row %}
-          {% endif %}
         {% endunless %}
       {% endfor %}
-
+      </div>
       {% include 'pagination' with sidebar %}
     </div>
   {% endpaginate %}
 </div>
+
+{% if section.settings.align_height %}
+  <style>
+    .list-collections .thumbnail img {
+      max-height: {{ section.settings.collection_height }}px;
+    }
+  </style>
+{% endif %}
 
 {% schema %}
 
@@ -182,58 +130,9 @@
   "name": "Collections",
   "class": "collection-template-section",
   "settings": [
-   {
-      "type": "select",
-      "id": "collections_per_row",
-      "label": "Collections per row",
-      "options": [
-        {
-          "value": "2",
-          "label": "2"
-        },
-        {
-          "value": "3",
-          "label": "3"
-        },
-        {
-          "value": "4",
-          "label": "4"
-        }
-      ]
-    },
-    {
-      "type": "select",
-      "id": "pagination_limit",
-      "label": "Collections per page",
-      "options": [
-        {
-          "value": "24",
-          "label": "24"
-        },
-        {
-          "value": "36",
-          "label": "36"
-        },
-        {
-          "value": "48",
-          "label": "48"
-        }
-      ]
-    },
-    {
-      "type": "checkbox",
-      "id": "display_collection_title",
-      "label": "Show page title"
-    },
-    {
-      "type": "checkbox",
-      "id": "collection_breadcrumb",
-      "label": "Show breadcrumb links",
-      "default": true
-    },
     {
       "type": "header",
-      "content": "Banner image"
+      "content": "Banner"
     },
     {
       "type": "image_picker",
@@ -249,6 +148,54 @@
     },
     {
       "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "checkbox",
+      "id": "collection_breadcrumb",
+      "label": "Show breadcrumb links",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "display_collection_title",
+      "label": "Show page title"
+    },
+    {
+      "type": "checkbox",
+      "id": "align_height",
+      "label": "Align height of collection images"
+    },
+    {
+      "type": "range",
+      "id": "collection_height",
+      "label": "Collection image height",
+      "min": 150,
+      "max": 400,
+      "step": 10,
+      "default": 200,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "collections_per_row",
+      "label": "Collections per row",
+      "min": 2,
+      "max": 4,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "pagination_limit",
+      "label": "Collections per page",
+      "min": 2,
+      "max": 50,
+      "step": 1,
+      "default": 18
+    },
+    {
+      "type": "header",
       "content": "Sidebar"
     },
     {
@@ -258,7 +205,8 @@
     {
       "type": "checkbox",
       "id": "toggle",
-      "label": "Toggle sidebar content"
+      "label": "Toggle sidebar content",
+      "default": false
     }
   ],
   "blocks": [
@@ -296,7 +244,7 @@
       "settings": [
         {
           "type": "paragraph",
-          "content": "To test the recently viewed products, view your online store outside of the Editor and visit multiple product pages ([?](https:\/\/help.outofthesandbox.com\/hc\/en-us\/articles\/115008765228))"
+          "content": "To test the recently viewed products, view your online store outside of the Editor and visit multiple product pages. [Learn more](https:\/\/help.outofthesandbox.com\/hc\/en-us\/articles\/115008765228)"
         },
         {
           "type": "text",
@@ -305,28 +253,13 @@
           "default": "Recently Viewed"
         },
         {
-          "type": "select",
+          "type": "range",
           "id": "sidebar_rv_per",
           "label": "Products limit",
-          "default": "3",
-          "options": [
-            {
-              "value": "1",
-              "label": "1"
-            },
-            {
-              "value": "2",
-              "label": "2"
-            },
-            {
-              "value": "3",
-              "label": "3"
-            },
-            {
-              "value": "4",
-              "label": "4"
-            }
-          ]
+          "min": 1,
+          "max": 4,
+          "step": 1,
+          "default": 3
         }
       ]
     },
